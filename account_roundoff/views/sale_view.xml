@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_order_form_inherit_round_off" model="ir.ui.view">
+            <field name="name">sale.order.round.off</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Hidden toggle: inject into the form sheet (not inside totals group) -->
+                <xpath expr="//group[@name='sale_header']" position="after">
+                    <field name="is_enabled_roundoff" invisible="1"/>
+                </xpath>
+
+                <!-- Round-off fields: appended inside the totals group, below the Total line -->
+                <xpath expr="//group[@name='sale_total']" position="inside">
+
+                    <div class="oe_subtotal_footer">
+                        <div class="o_row">
+                            <div class="o_td_label">
+                                <label for="amount_round_off"/>
+                            </div>
+                            <div class="o_td_value">
+                                <field name="amount_round_off"
+                                       widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"
+                                       nolabel="1"/>
+                            </div>
+                        </div>
+
+                        <div class="o_row">
+                            <div class="o_td_label">
+                                <label for="amount_round_off_total"/>
+                            </div>
+                            <div class="o_td_value">
+                                <field name="amount_round_off_total"
+                                       widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"
+                                       nolabel="1"
+                                       class="oe_subtotal_footer_separator"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

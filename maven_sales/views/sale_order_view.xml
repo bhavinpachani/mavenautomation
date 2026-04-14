@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sale_order_line_inherit_serial_number" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.serial.number</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+
+                <field name="carrier_id"/>
+                <field name="carrier_tracking_ref"/>
+
+                <field name="po_no_ref"
+                       readonly="state == 'sale'"/>
+
+                <field name="payment_term_boolean"/>
+
+                <field name="po_description"
+                       required="po_no_ref == 'verbal'"
+                       readonly="state == 'sale'"/>
+
+                <field name="store_file" invisible="1"/>
+
+                <field name="file"
+                       required="po_no_ref == 'po'"
+                       filename="store_file"
+                       invisible="po_no_ref == 'verbal' or not po_no_ref"/>
+
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='qty_delivered']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='qty_invoiced']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='price_subtotal']" position="before">
+                <field name="unit_rate" />
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='price_subtotal']" position="after">
+                <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='tax_ids']" position="move"/>
+            </xpath>
+
+            <!-- Hide the original customer_lead field -->
+            <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='customer_lead']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+            <!-- Add the new lead_time field in the same position -->
+            <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='customer_lead']" position="after">
+                <field name="lead_time" string="Lead Time" class="oe_inline"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

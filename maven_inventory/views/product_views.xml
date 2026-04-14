@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_product_template_add_fields" model="ir.ui.view">
+        <field name="name">view.product.template.add.fields</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='type']" position="after">
+                <field name="inv_type_id" options="{'no_create_edit': True, 'no_quick_create': True}" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_form_view_procurement_button_add_fields" model="ir.ui.view">
+        <field name="name">product.template.form.view.procurement.button.add.fields</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_product_tmpl_forecast_report']" position="after">
+                <button type="object"
+                    name="action_dummy"
+                    context="{'default_product_tmpl_id': id}"
+                    class="oe_stat_button" icon="fa-area-chart"
+                invisible="type != 'consu'">
+                    <div class="d-flex flex-row gap-1 ms-1">
+                        <div class="o_field_widget o_stat_info flex-column align-items-end gap-1">
+                            <span class="o_stat_value">
+                                <field name="x_free_qty" widget="statinfo" nolabel="1"/>
+                            </span>
+                            <span class="o_stat_value text-muted">
+                                Actual Qty.
+                            </span>
+                        </div>
+                    </div>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+    <record id="product_template_form_inherit_add_update_fields" model="ir.ui.view">
+        <field name="name">product.template.form.add.update.fields</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="force_save">1</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="product_template_search_inherit_group" model="ir.ui.view">
+        <field name="name">product.template.search.inherit.group</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+
+            <!-- Add inside existing Group By -->
+            <xpath expr="//group" position="inside">
+                <filter name="group_by_inventory_type"
+                        string="Make"
+                        context="{'group_by': 'inv_type_id'}"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

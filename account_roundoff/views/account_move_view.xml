@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- Invoice form: show roundoff fields -->
+        <record id="invoice_extend_round_off_view" model="ir.ui.view">
+            <field name="name">account.move.extend.round.off</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='amount_residual']" position="before">
+
+                    <field name="round_active" invisible="1"/>
+
+                    <field name="rounded_total"
+                           invisible="not round_active"/>
+
+                    <field name="round_off_value"
+                           invisible="not round_active"/>
+
+                    <field name="round_off_amount" invisible="1"/>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

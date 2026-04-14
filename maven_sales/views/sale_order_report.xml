@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_document_inherit" inherit_id="sale.report_saleorder_document">
+    
+        <!-- Hide discount column entirely and correctly maintain table colspans -->
+        <xpath expr="//t[@t-set='display_discount']" position="replace">
+            <t t-set="display_discount" t-value="False"/>
+        </xpath>
+
+        <!-- Force taxes to display unconditionally -->
+        <xpath expr="//t[@t-set='display_taxes']" position="replace">
+            <t t-set="display_taxes" t-value="True"/>
+        </xpath>
+
+        <!-- Initialize Sequence Counter -->
+        <xpath expr="//tbody[hasclass('sale_tbody')]" position="before">
+            <t t-set="seq_number" t-value="0"/>
+        </xpath>
+
+        <!-- Add Sequence Header -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th name="th_sequence" class="text-center">Sr. No.</th>
+        </xpath>
+
+        <!-- Change Header Unit Price -> Unit Rate AND add Delivery Time -->
+        <xpath expr="//th[@name='th_priceunit']" position="replace">
+            <th name="th_lead_time" class="text-end text-nowrap">Delivery Time</th>
+            <th name="th_unit_rate" class="text-end text-nowrap">Unit Rate</th>
+        </xpath>
+
+        <!-- Add sequence data cell for standard products -->
+        <xpath expr="//td[@name='td_product_name']" position="before">
+            <td name="td_sequence" class="text-center">
+                <t t-set="seq_number" t-value="seq_number + 1"/>
+                <span t-out="seq_number"/>
+            </td>
+        </xpath>
+        
+        <!-- Add sequence data cell for combo lines -->
+        <xpath expr="//td[@name='td_combo_name']" position="before">
+            <td name="td_combo_sequence" class="text-center">
+                <t t-set="seq_number" t-value="seq_number + 1"/>
+                <span t-out="seq_number"/>
+            </td>
+        </xpath>
+
+        <!-- Add empty cell for group total headers -->
+        <xpath expr="//td[@name='td_section_group_name']" position="before">
+            <td name="td_section_group_sequence"/>
+        </xpath>
+
+        <!-- Replace price_unit field with unit_rate on data lines AND add lead_time -->
+        <xpath expr="//td[@name='td_product_priceunit']" position="replace">
+            <td name="td_lead_time" class="text-end text-nowrap">
+                <span t-field="line.lead_time"/>
+            </td>
+            <td name="td_unit_rate" class="text-end text-nowrap">
+                <span t-if="not collapse_prices" t-field="line.unit_rate"/>
+            </td>
+        </xpath>
+
+        <!-- Replace the tax column to explicitly use the tax_id field -->
+        <xpath expr="//td[@name='td_product_taxes']" position="replace">
+            <td name="td_product_taxes" class="text-end text-nowrap">
+                <!-- Natively the relationship is tax_id, replacing default taxonomy layout -->
+                <span t-field="line.tax_ids"/>
+            </td>
+        </xpath>
+
+        <!-- Ensure colspans are adjusted for the new Delivery Time and Sequence columns -->
+        <!-- section_name spans BOTH sequence and delivery time so it expands by 2: 3 + 2 = 5 -->
+        <xpath expr="//t[@t-set='section_name_colspan'][@t-value]" position="replace">
+            <t t-set="section_name_colspan" t-value="5 + (1 if display_discount else 0) + (1 if display_taxes else 0)"/>
+        </xpath>
+        <!-- combo_name has its own sequence cell prepended, so it only shifts and expands by 1: 3 + 1 = 4 -->
+        <xpath expr="//td[@name='td_combo_name']" position="attributes">
+            <attribute name="t-att-colspan">4 + (1 if display_discount else 0) + (1 if display_taxes else 0)</attribute>
+        </xpath>
+
+        <!-- Add an empty cell to the section summary for the new Delivery Time column -->
+        <xpath expr="//td[@name='td_section_group_priceunit']" position="before">
+            <td name="td_section_group_lead_time"/>
+        </xpath>
+
+    </template>
+</odoo>

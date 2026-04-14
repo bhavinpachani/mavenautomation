@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_order_line_tree_inherit_discount" model="ir.ui.view">
+        <field name="name">purchase.order.line.tree.discount</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_history_tree"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert discount before subtotal -->
+            <xpath expr="//field[@name='price_subtotal']" position="before">
+                <field name="discount" string="Discount (%)"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

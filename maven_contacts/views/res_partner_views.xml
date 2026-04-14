@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_inherit_add_fields" model="ir.ui.view">
+        <field name="name">res.partner.form.add.fields</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='sales_purchases']/group[@name='container_row_2']/group[@name='misc']/field[@name='industry_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="industry_id" options="{'no_create': True}"/>
+            </xpath>
+
+            <xpath expr="//field[@name='email']" position="after">
+                <div class="d-flex align-items-baseline w-md-50">
+                    <field name="is_email_none" class="w-100"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='phone']" position="after">
+                <div class="d-flex align-items-baseline w-md-50">
+                    <field name="is_phone_none" class="w-100"/>
+                </div>
+                <div class="d-flex align-items-baseline w-md-50">
+                    <i class="fa fa-fw me-1 fa-user text-primary" title="Contact Name"/>
+                    <field name="contact_name" class="w-100" placeholder="Contact Name"/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

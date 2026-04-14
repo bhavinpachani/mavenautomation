@@ -1,0 +1,111 @@
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError, ValidationError
+
+
+class PurchaseOrder(models.Model):
+    _inherit = "purchase.order"
+
+    show_discount = fields.Boolean(string="Show Discount")
+
+    def button_confirm(self):
+        params = self.env['ir.config_parameter'].sudo()
+
+        def get_bool(param):
+            return params.get_param(param) == 'True'
+
+        validate_po_vat = get_bool('mavenautomation.validate_po_vat')
+        validate_po_email = get_bool('mavenautomation.validate_po_email')
+        validate_po_mobile = get_bool('mavenautomation.validate_po_mobile')
+        validate_po_payment_term = get_bool('mavenautomation.validate_po_payment_term')
+        validate_po_address = get_bool('mavenautomation.validate_po_address')
+        validate_po_tag = get_bool('mavenautomation.validate_po_tag')
+        validate_po_industry_id = get_bool('mavenautomation.validate_po_industry_id')
+
+        for order in self:
+            partner = order.partner_id.parent_id or order.partner_id
+            validate_msgs = []
+
+            # VAT
+            if validate_po_vat and not partner.vat:
+                validate_msgs.append("Vat")
+
+            # Email
+            if validate_po_email and not partner.email:
+                validate_msgs.append("Email")
+
+            # Mobile
+            if validate_po_mobile and not partner.phone:
+                validate_msgs.append("Phone")
+
+            # Payment Term
+            if validate_po_payment_term and not partner.property_supplier_payment_term_id:
+                validate_msgs.append("Vendor Payment Term")
+
+            # Address
+            if validate_po_address:
+                if not partner.street:
+                    validate_msgs.append("Address -> Street")
+                if not partner.city:
+                    validate_msgs.append("Address -> City")
+                if not partner.state_id:
+                    validate_msgs.append("Address -> State")
+
+            # Tags
+            if validate_po_tag and not partner.category_id:
+                validate_msgs.append("Deal In")
+
+            # Industry
+            if validate_po_industry_id and not partner.industry_id:
+                validate_msgs.append("Contact Type")
+
+            if validate_msgs:
+                msg = "Vendor Information Missing for %s\n\t*\t" % order.name
+                msg += "\n\t*\t".join(validate_msgs)
+                raise ValidationError(msg)
+
+
+        res = super().button_confirm()
+
+        for po in self:
+            for line in po.order_line:
+                product = line.product_id
+                vendor = po.partner_id
+
+                # Search existing supplierinfo
+                supplierinfo = self.env['product.supplierinfo'].search([
+                    ('partner_id', '=', vendor.id),
+                    ('product_tmpl_id', '=', product.product_tmpl_id.id),
+                ], limit=1)
+
+                vals = {
+                    'price': line.price_unit,
+                    'last_purchase_date': fields.Date.today(),
+                    'currency_id': po.currency_id.id,
+                    'discount': line.discount
+                }
+
+                product.product_tmpl_id.standard_price = line.price_unit
+
+                if supplierinfo:
+                    # ✅ Update existing record
+                    supplierinfo.write(vals)
+        return res
+
+
+class PurchaseOrderLine(models.Model):
+    _inherit  = 'purchase.order.line'
+
+    unit_rate = fields.Float(
+        string="Unit Rate",
+        compute="_compute_unit_rate",
+        store=True
+    )
+
+    @api.depends('price_unit', 'product_qty', 'discount')
+    def _compute_unit_rate(self):
+        for line in self:
+            if line.product_qty:
+                total_after_discount = line.price_unit * line.product_qty * (1 - (line.discount or 0) / 100)
+                line.unit_rate = total_after_discount / line.product_qty
+            else:
+                line.unit_rate = line.price_unit

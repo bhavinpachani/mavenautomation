@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_indiamart_enquiry_tree" model="ir.ui.view">
+        <field name="name">indiamart.enquiry.tree</field>
+        <field name="model">indiamart.enquiry</field>
+        <field name="arch" type="xml">
+            <list string="Indiamart">
+                <field name="name"/>
+                <field name="mobile"/>
+                <field name="key"/>
+                <field name="company_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_indiamart_enquiry_form" model="ir.ui.view">
+        <field name="name">indiamart.enquiry.form</field>
+        <field name="model">indiamart.enquiry</field>
+        <field name="arch" type="xml">
+            <form string="Indiamart">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Account"/>
+                        <h1><field name="name" placeholder="Account name..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="mobile"/>
+                            <field name="key"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_indiamart_enquiry_form" model="ir.actions.act_window">
+        <field name="name">IndiaMart</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">indiamart.enquiry</field>
+        <field name="view_mode">list,form</field>
+        <field name="help">Create and manage the IndiaMart account that will be managed by Odoo from here.</field>
+    </record>
+
+    <menuitem action="action_indiamart_enquiry_form" id="menu_action_indiamart_enquiry_form" parent="base.menu_users"/>
+
+</odoo>

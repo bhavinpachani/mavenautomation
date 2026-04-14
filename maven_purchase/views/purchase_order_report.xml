@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_purchaseorder_document_inherit" inherit_id="purchase.report_purchaseorder_document">
+        
+        <!-- Initialize sequence counter -->
+        <xpath expr="//tbody" position="before">
+            <t t-set="seq_number" t-value="0"/>
+        </xpath>
+
+        <!-- Sequence Header -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th name="th_sequence" class="text-center"><strong>Sr. No.</strong></th>
+        </xpath>
+
+        <!-- Sequence Column Data -->
+        <xpath expr="//td[@id='product']" position="before">
+            <td name="td_sequence" class="text-center">
+                <t t-set="seq_number" t-value="seq_number + 1"/>
+                <span t-out="seq_number"/>
+            </td>
+        </xpath>
+
+        <!-- Expected Date Header -->
+        <xpath expr="//th[@name='th_price_unit']" position="before">
+            <th name="th_date_planned" class="text-start"><strong>Expected Date</strong></th>
+        </xpath>
+
+        <!-- Expected Date Data -->
+        <xpath expr="//td[span[@t-field='line.price_unit']]" position="before">
+            <td name="td_date_planned" class="text-start">
+                <span t-field="line.date_planned" t-options='{"widget": "date"}'/>
+            </td>
+        </xpath>
+
+        <!-- Unit Rate Header after Discount -->
+        <xpath expr="//th[@name='th_discount']" position="after">
+            <th name="th_unit_rate" class="text-end"><strong>Unit Rate</strong></th>
+        </xpath>
+
+        <!-- Unit Rate Data after Discount -->
+        <xpath expr="//td[descendant::span[@t-field='line.discount']]" position="after">
+            <td name="td_unit_rate" class="text-end">
+                <span t-field="line.unit_rate"/>
+            </td>
+        </xpath>
+
+        <!-- Move Tax Header after Amount/Subtotal -->
+        <xpath expr="//th[@name='th_taxes']" position="replace"/>
+        <xpath expr="//th[@name='th_subtotal']" position="after">
+            <th name="th_taxes" class="text-end"><strong>Taxes</strong></th>
+        </xpath>
+
+        <!-- Move Tax Data after Amount/Subtotal -->
+        <!-- Replace the old tax cell which is exactly the preceding sibling to the subtotal cell -->
+        <xpath expr="//td[span[@t-field='line.price_subtotal']]/preceding-sibling::td[1]" position="replace"/>
+        
+        <!-- Insert the new tax cell after the subtotal cell -->
+        <xpath expr="//td[span[@t-field='line.price_subtotal']]" position="after">
+            <td name="td_taxes" class="text-end">
+                <span t-out="', '.join(tax.tax_label for tax in line.tax_ids if tax.tax_label)"/>
+            </td>
+        </xpath>
+
+        <!-- Conditional Visibility: Hide Unit Price Header and Data if o.show_discount == True -->
+        <xpath expr="//th[@name='th_price_unit']" position="attributes">
+            <attribute name="t-if">o.show_discount</attribute>
+        </xpath>
+        <xpath expr="//td[span[@t-field='line.price_unit']]" position="attributes">
+            <attribute name="t-if">o.show_discount</attribute>
+        </xpath>
+
+        <!-- Conditional Visibility: Hide Discount Header and Data if o.show_discount == True -->
+        <xpath expr="//th[@name='th_discount']" position="attributes">
+            <attribute name="t-if">o.show_discount</attribute>
+        </xpath>
+        <xpath expr="//td[descendant::span[@t-field='line.discount']]" position="attributes">
+            <attribute name="t-if">o.show_discount</attribute>
+        </xpath>
+
+    </template>
+</odoo>
