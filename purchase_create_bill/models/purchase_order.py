@@ -74,7 +74,7 @@ class PurchaseOrder(models.Model):
             'currency_id': self.currency_id.id,
             'payment_reference': self.partner_ref or self.name,
             'invoice_origin': self.name,
-            'ref': self.partner_ref or self.name,
+            'ref': '',
             'company_id': self.company_id.id,
         }
 

@@ -7,6 +7,43 @@ class PurchaseOrder(models.Model):
 
     show_discount = fields.Boolean(string="Show Discount")
 
+    def get_merged_report_lines(self):
+        self.ensure_one()
+        merged_lines = self.env['purchase.order.line'].browse()
+        seen_products = {}
+
+        for line in self.order_line:
+            if line.display_type or not line.product_id:
+                merged_lines += line
+                continue
+
+            product_id = line.product_id.id
+            if product_id in seen_products:
+                seen_line = seen_products[product_id]
+                seen_line.update({
+                    'product_qty': seen_line.product_qty + line.product_qty,
+                    'price_subtotal': seen_line.price_subtotal + line.price_subtotal,
+                })
+            else:
+                new_line = self.env['purchase.order.line'].new({
+                    'order_id': self.id,
+                    'product_id': line.product_id.id,
+                    'name': line.name,
+                    'product_qty': line.product_qty,
+                    'price_unit': line.price_unit,
+                    'date_planned': line.date_planned,
+                    'discount': line.discount,
+                    'unit_rate': line.unit_rate,
+                    'price_subtotal': line.price_subtotal,
+                    'display_type': line.display_type,
+                    'tax_ids': [(6, 0, line.tax_ids.ids)],
+                    'product_uom_id': line.product_uom.id,
+                })
+                seen_products[product_id] = new_line
+                merged_lines += new_line
+
+        return merged_lines
+
     def button_confirm(self):
         params = self.env['ir.config_parameter'].sudo()
 
@@ -80,11 +117,12 @@ class PurchaseOrder(models.Model):
                 vals = {
                     'price': line.price_unit,
                     'last_purchase_date': fields.Date.today(),
+                    'unit_rate': line.unit_rate,
                     'currency_id': po.currency_id.id,
                     'discount': line.discount
                 }
 
-                product.product_tmpl_id.standard_price = line.price_unit
+                product.product_tmpl_id.standard_price = line.unit_rate
 
                 if supplierinfo:
                     # ✅ Update existing record

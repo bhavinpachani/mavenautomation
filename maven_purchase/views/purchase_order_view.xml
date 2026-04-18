@@ -6,9 +6,25 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
 
+            <!-- Bold partner and picking types -->
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="style">font-weight: bold;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='picking_type_id']" position="attributes">
+                <attribute name="style">font-weight: bold;</attribute>
+            </xpath>
+
             <!-- Insert discount before subtotal -->
             <xpath expr="//field[@name='partner_ref']" position="after">
                 <field name="show_discount" string="Show Discount"/>
+            </xpath>
+
+            <xpath expr="//field[@name='date_planned']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='effective_date']" position="attributes">
+                <attribute name="invisible">1</attribute>
             </xpath>
 
             <xpath expr="//notebook/page[@name='products']/field[@name='order_line']//list/field[@name='product_uom_id']" position="after">

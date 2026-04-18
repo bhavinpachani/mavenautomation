@@ -72,9 +72,14 @@ class ProductTemplate(models.Model):
     def onchange_internal_reference(self):
         for product in self:
             if product.default_code:
-                product.description = product.default_code
-                product.description_sale = product.default_code
-                product.description_purchase = product.default_code
+                internal_reference = product.default_code.upper()
+                product.default_code = internal_reference
+                product.description = internal_reference
+                product.description_sale = internal_reference
+                product.description_purchase = internal_reference
+                product.description_picking = internal_reference
+                product.description_pickingin = internal_reference
+                product.description_pickingout = internal_reference
 
     def action_dummy(self):
         for product in self:
@@ -123,9 +128,14 @@ class ProductProduct(models.Model):
     def onchange_internal_reference(self):
         for product in self:
             if product.default_code:
-                product.description = product.default_code
-                product.description_sale = product.default_code
-                product.description_purchase = product.default_code
+                product.default_code = internal_reference
+                internal_reference = product.default_code.upper()
+                product.description = internal_reference
+                product.description_sale = internal_reference
+                product.description_purchase = internal_reference
+                product.description_picking = internal_reference
+                product.description_pickingin = internal_reference
+                product.description_pickingout = internal_reference
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -15,6 +15,7 @@
         'delivery'
     ],
     'data': [
+        'views/product_supplierinfo_view.xml',
         'views/purchase_order_view.xml',
         'views/res_config_settings_view.xml',
         'views/purchase_history_view.xml',

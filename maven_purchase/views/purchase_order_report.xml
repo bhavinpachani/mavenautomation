@@ -1,10 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_purchaseorder_document_inherit" inherit_id="purchase.report_purchaseorder_document">
+
+        <!-- Remove Expected Arrival from Header -->
+        <xpath expr="//div[@id='informations']/div[@t-if='o.date_planned']" position="replace"/>
         
-        <!-- Initialize sequence counter -->
+        <!-- Calculate product sums and select first lines to display -->
         <xpath expr="//tbody" position="before">
             <t t-set="seq_number" t-value="0"/>
+            <t t-set="product_sums" t-value="{}"/>
+            <!-- Use list to maintain order -->
+            <t t-set="lines_to_show" t-value="[]"/>
+            <t t-foreach="o.order_line" t-as="l">
+                <t t-if="l.product_id">
+                    <t t-set="pid" t-value="l.product_id.id"/>
+                    <t t-if="pid not in product_sums">
+                        <t t-set="dummy" t-value="product_sums.update({pid: l.product_qty})"/>
+                        <t t-set="dummy" t-value="lines_to_show.append(l.id)"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="dummy" t-value="product_sums.update({pid: product_sums[pid] + l.product_qty})"/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <t t-set="dummy" t-value="lines_to_show.append(l.id)"/>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Ensure duplicate product rows do not render -->
+        <xpath expr="//td[@id='product']/.." position="attributes">
+            <attribute name="t-if">line.id in lines_to_show</attribute>
         </xpath>
 
         <!-- Sequence Header -->
@@ -75,6 +101,44 @@
         </xpath>
         <xpath expr="//td[descendant::span[@t-field='line.discount']]" position="attributes">
             <attribute name="t-if">o.show_discount</attribute>
+        </xpath>
+
+        <!-- Replace Quantity with calculated sum -->
+        <xpath expr="//span[@t-field='line.product_qty']" position="replace">
+            <t t-if="line.product_id">
+                <span t-out="product_sums[line.product_id.id]"/>
+            </t>
+            <t t-else="">
+                <span t-field="line.product_qty"/>
+            </t>
+        </xpath>
+
+        <!-- Replace Subtotal with calculated Subtotal for the merged quantity -->
+        <xpath expr="//span[@t-field='line.price_subtotal']" position="replace">
+            <t t-if="line.product_id">
+                <t t-set="calc_qty" t-value="product_sums[line.product_id.id]"/>
+                <t t-set="price" t-value="line.price_unit * (1 - (line.discount or 0.0) / 100.0)"/>
+                <t t-set="taxes_res" t-value="line.tax_ids.compute_all(price, line.order_id.currency_id, calc_qty, product=line.product_id, partner=line.order_id.partner_id)"/>
+                <span t-out="taxes_res['total_excluded']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+            </t>
+            <t t-else="">
+                <span t-field="line.price_subtotal"/>
+            </t>
+        </xpath>
+
+        <!-- Format Description to bold default_code -->
+        <xpath expr="//td[@id='product']/span[@t-field='line.name']" position="replace">
+            <t t-if="line.product_id">
+                <t t-if="line.product_id.default_code">
+                    <strong>[<span t-out="line.product_id.default_code"/>]</strong> <span t-out="line.product_id.name"/>
+                </t>
+                <t t-else="">
+                    <span t-out="line.product_id.name"/>
+                </t>
+            </t>
+            <t t-else="">
+                <span t-field="line.name"/>
+            </t>
         </xpath>
 
     </template>
