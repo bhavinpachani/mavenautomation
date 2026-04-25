@@ -138,6 +138,7 @@ class PurchaseOrderLine(models.Model):
         compute="_compute_unit_rate",
         store=True
     )
+    price_unit = fields.Float(string="LP")
 
     @api.depends('price_unit', 'product_qty', 'discount')
     def _compute_unit_rate(self):

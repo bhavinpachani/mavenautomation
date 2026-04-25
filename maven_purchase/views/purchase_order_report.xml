@@ -70,6 +70,11 @@
             </td>
         </xpath>
 
+        <!-- Change Amount header to Subtotal -->
+        <xpath expr="//th[@name='th_subtotal']" position="replace">
+            <th name="th_subtotal" class="text-end"><strong>Subtotal</strong></th>
+        </xpath>
+
         <!-- Move Tax Header after Amount/Subtotal -->
         <xpath expr="//th[@name='th_taxes']" position="replace"/>
         <xpath expr="//th[@name='th_subtotal']" position="after">

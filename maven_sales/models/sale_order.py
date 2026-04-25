@@ -86,13 +86,14 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    lead_time = fields.Char(string="Lead Time")
-    price_unit = fields.Float(string="LP(Unit Price)")
+    lead_time = fields.Char(string="Del. Time")
+    price_unit = fields.Float(string="LP")
     unit_rate = fields.Float(
         string="Unit Rate",
         compute="_compute_unit_rate",
         store=True
     )
+    price_subtotal = fields.Monetary(string="Subtotal")
 
     @api.depends('price_unit', 'product_uom_qty', 'discount')
     def _compute_unit_rate(self):

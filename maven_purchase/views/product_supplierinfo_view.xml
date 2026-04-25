@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
 
             <!-- Bold partner and picking types -->
-            <xpath expr="//field[@name='price']" position="after">
+            <xpath expr="//field[@name='discount']" position="after">
                 <field name="unit_rate"/>
             </xpath>
 

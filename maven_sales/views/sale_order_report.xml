@@ -28,6 +28,13 @@
             <th name="th_unit_rate" class="text-end text-nowrap">Unit Rate</th>
         </xpath>
 
+        <!-- Change Amount header to Subtotal -->
+        <xpath expr="//th[@name='th_subtotal']" position="replace">
+            <th name="th_subtotal" class="text-end">
+                <span>Subtotal</span>
+            </th>
+        </xpath>
+
         <!-- Add sequence data cell for standard products -->
         <xpath expr="//td[@name='td_product_name']" position="before">
             <td name="td_sequence" class="text-center">

@@ -12,6 +12,7 @@
     'website': 'https://www.mavenautomation.in',
     'depends': [
         'sale_management',
+        'sale_margin',
         'delivery'
     ],
     'data': [

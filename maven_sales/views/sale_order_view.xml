@@ -53,9 +53,21 @@
 
             <!-- Add the new lead_time field in the same position -->
             <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']//list/field[@name='customer_lead']" position="after">
-                <field name="lead_time" string="Lead Time" class="oe_inline"/>
+                <field name="lead_time" string="Del. Time" class="oe_inline"/>
+                <field name="purchase_price" optional="hide"/>
             </xpath>
 
+        </field>
+    </record>
+
+    <record id="sale_margin_sale_order_add_fields" model="ir.ui.view">
+        <field name="name">sale.margin.sale.order.add.fields</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_margin.sale_margin_sale_order"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']//field[@name='purchase_price']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
         </field>
     </record>
 

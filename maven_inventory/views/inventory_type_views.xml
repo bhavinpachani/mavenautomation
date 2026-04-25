@@ -38,7 +38,7 @@
     <menuitem
         id="menu_inventory_type"
         name="Make"
-        parent="purchase.menu_purchase_config"
+        parent="stock.menu_warehouse_config"
         action="action_inventory_type"
         sequence="6"
         groups="purchase.group_purchase_manager"
