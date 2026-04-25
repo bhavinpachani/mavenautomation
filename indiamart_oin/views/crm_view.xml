@@ -7,6 +7,17 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//group[@name='lead_info']//field[@name='email_from']" position="after">
+                <div class="d-flex align-items-baseline w-md-50">
+                    <field name="is_email_none" class="w-100"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//group[@name='lead_info']//field[@name='phone']" position="after">
+                <div class="d-flex align-items-baseline w-md-50">
+                    <field name="is_phone_none" class="w-100"/>
+                </div>
+            </xpath>
             <xpath expr="//group[@name='lead_priority']" position="after">
                 <group name="indiamart_info" string="IndiaMart">
                     <field name="indiamart_id" options="{'no_create': True, 'no_open': True}"/>

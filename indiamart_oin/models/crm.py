@@ -20,6 +20,19 @@ class Leads(models.Model):
     )
     indiamart_id = fields.Many2one('indiamart.enquiry', string='IndiaMart A/c')
     indiamart_query_id = fields.Char("Indiamart Query#")
+    is_email_none = fields.Boolean(string="E.None")
+    is_phone_none = fields.Boolean(string="M.None")
+
+    def _prepare_customer_values(self, partner_name, is_company=False, parent_id=False):
+        vals = super()._prepare_customer_values(partner_name, is_company, parent_id)
+
+        # ✅ Add your custom values here
+        vals.update({
+            'is_email_none': self.is_email_none,
+            'is_phone_none': self.is_phone_none,
+        })
+
+        return vals
 
     @api.model
     def _cron_enquiry_indiamart_leads(self):
@@ -48,7 +61,6 @@ class Leads(models.Model):
             try:
                 response = requests.post(url, timeout=TIMEOUT)
                 data = response.json()
-                print("Data resposne = \n \n",data)
                 for lead in data.get('RESPONSE', []):
                     indiamart_query_id = str(
                         lead.get('UNIQUE_QUERY_ID', '') or ''
@@ -87,10 +99,6 @@ class Leads(models.Model):
                         and lead['SENDER_ADDRESS'].split(',')
                         or ''
                     )
-                    phone = lead.get('SENDER_MOBILE', '')
-                    print("Phone === \n \n",phone)
-                    clean_number = phone.replace('+91-', '')
-                    print("Clean number => \n \n",clean_number)
 
                     domain = ['|', ('active', '=', True), ('active', '=', False)]
                     if lead.get('SUBJECT', ''):
@@ -100,7 +108,7 @@ class Leads(models.Model):
                     if lead.get('SENDER_NAME', ''):
                         domain.append(('contact_name', '=', str(lead.get('SENDER_NAME', '') or '').strip()))
                     if lead.get('SENDER_MOBILE', ''):
-                        domain.append(('phone', '=', str(clean_number or '').strip()))
+                        domain.append(('phone', '=', str(lead.get('SENDER_MOBILE', '') or '').strip()))
                     if lead.get('SENDER_EMAIL', ''):
                         domain.append(('email_from', '=', str(lead.get('SENDER_EMAIL', '') or '').strip().replace(" ", "")))
 
@@ -109,7 +117,6 @@ class Leads(models.Model):
                         lead_rec = lead_obj.search(
                             [('indiamart_query_id', '=', indiamart_query_id)]
                         )
-
                     if not lead_rec:
                         lead_rec = lead_obj.create({
                             'type': 'lead',
@@ -123,7 +130,7 @@ class Leads(models.Model):
                             'city': str(lead.get('SENDER_CITY', '') or '').strip(),
                             'state_id': state.id if state else False,
                             'country_id': country_rec.id if country_rec else False,
-                            'phone': str(clean_number or '').strip(),
+                            'phone': str(lead.get('SENDER_MOBILE', '') or '').strip(),
                             'description': lead.get('QUERY_MESSAGE', ''),
                             'email_from': str(lead.get('SENDER_EMAIL', '') or '').strip().replace(" ", ""),
                             'zip': (
@@ -137,5 +144,6 @@ class Leads(models.Model):
                             'indiamart_query_id': indiamart_query_id or False,
                         })
                         lead_rec.write({'user_id': False})
+
             except Exception as e:
                 _logger.error('IndiaMart Lead Sync Error: %s', e)
