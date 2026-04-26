@@ -28,6 +28,36 @@ class SaleOrder(models.Model):
                 if rec.po_no_ref == 'po' and not rec.file:
                     raise UserError(_("Please upload document for this record"))
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            date_order = vals.get('date_order') or fields.Datetime.now()
+            fy = self._get_fiscal_year(fields.Datetime.to_datetime(date_order))
+
+            sequence_code = f"sale.order.{fy}"
+
+            seq = self.env['ir.sequence'].next_by_code(sequence_code)
+
+            if not seq:
+                # create sequence dynamically if not exists
+                self.env['ir.sequence'].create({
+                    'name': f"Sale Order {fy}",
+                    'code': sequence_code,
+                    'prefix': f"SO/{fy}/",
+                    'padding': 4,
+                    'company_id': vals.get('company_id') or self.env.company.id,
+                })
+                seq = self.env['ir.sequence'].next_by_code(sequence_code)
+
+            vals['name'] = seq
+
+        return super().create(vals_list)
+
+    def _get_fiscal_year(self, dt):
+        if dt.month >= 4:
+            return f"{str(dt.year)[-2:]}-{str(dt.year + 1)[-2:]}"
+        return f"{str(dt.year - 1)[-2:]}-{str(dt.year)[-2:]}"
+
     def action_confirm(self):
         params = self.env['ir.config_parameter'].sudo()
 

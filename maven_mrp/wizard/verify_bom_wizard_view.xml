@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_verify_bom_wizard_form" model="ir.ui.view">
+        <field name="name">verify.bom.wizard.form</field>
+        <field name="model">verify.bom.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Verify BOM">
+                <group>
+                    <field name="file" filename="file_name"/>
+                    <field name="result_message" readonly="1"/>
+                    <field name="updated_file" filename="updated_file_name" readonly="1"/>
+                </group>
+
+                <footer>
+                    <button name="action_verify" type="object"
+                            string="Verify" class="btn-primary"/>
+                    <button name="action_download"
+                            type="object"
+                            string="Download Result"
+                            class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_verify_bom_wizard" model="ir.actions.act_window">
+        <field name="name">Verify BOM</field>
+        <field name="res_model">verify.bom.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu under MRP Configuration -->
+    <menuitem id="menu_verify_bom_root"
+              name="Verify BOM"
+              parent="mrp.menu_mrp_configuration"
+              action="action_verify_bom_wizard"
+              sequence="50"/>
+
+</odoo>

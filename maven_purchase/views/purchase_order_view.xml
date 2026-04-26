@@ -6,6 +6,12 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
 
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_qty']" position="after">
+                <field name="purchase_for_id"
+                       required="1"
+                       options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+
             <!-- Bold partner and picking types -->
             <xpath expr="//field[@name='partner_id']" position="attributes">
                 <attribute name="style">font-weight: bold;</attribute>
@@ -27,7 +33,11 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
 
-            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']//list/field[@name='product_uom_id']" position="after">
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']//list/field[@name='product_qty']" position="after">
+                <xpath expr="//notebook/page[@name='products']/field[@name='order_line']//list/field[@name='product_uom_id']" position="move"/>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='products']/field[@name='order_line']//list/field[@name='price_unit']" position="before">
                 <xpath expr="//notebook/page[@name='products']/field[@name='order_line']//list/field[@name='date_planned']" position="move"/>
             </xpath>
 
@@ -44,4 +54,73 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_purchase_order_line_custom_tree" model="ir.ui.view">
+        <field name="name">purchase.order.line.custom.tree</field>
+        <field name="model">purchase.order.line</field>
+        <field name="arch" type="xml">
+            <list create="false"
+                  edit="false"
+                  delete="false"
+                  default_order="order_id asc"
+                  >
+
+                <field name="currency_id" column_invisible="True"/>
+                <field name="order_id" optional="hide"/>
+                <field name="date_approve" string="Date"/>
+                <field name="product_id" string="Product"/>
+                <field name="partner_id" string="Vendor" optional="hide"/>
+                <field name="product_qty" string="Quantity"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="price_unit" widget="monetary" string="LP"/>
+                <field name="unit_rate" string="Unit Rate"/>
+                <field name="price_subtotal" widget="monetary" string="Subtotal"/>
+                <field name="purchase_for_id"/>
+                <field name="state" optional="hide"/>
+
+            </list>
+        </field>
+    </record>
+
+    <record id="purchase_order_line_search_inherit_purchase_for" model="ir.ui.view">
+        <field name="name">purchase.order.line.search.inherit.purchase.for</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_search"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Add field in search -->
+            <xpath expr="//search" position="inside">
+                <field name="purchase_for_id"/>
+            </xpath>
+
+            <!-- 2. Add field in search -->
+            <xpath expr="//search" position="inside">
+                    <filter string="Purchase For"
+                        name="purchase_for"
+                    domain="[('purchase_for_id', '!=', False)]"/>
+            </xpath>
+
+            <!-- 3. Add group by section -->
+            <xpath expr="//search/group" position="inside">
+                <filter string="Purchase For"
+                        name="group_by_purchase_for"
+                        context="{'group_by': 'purchase_for_id'}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="action_purchase_order_line_custom" model="ir.actions.act_window">
+        <field name="name">Purchase Order Lines</field>
+        <field name="res_model">purchase.order.line</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_purchase_order_line_custom_tree"/>
+    </record>
+
+    <menuitem id="menu_purchase_order_line_custom"
+          name="Purchase Order Lines"
+          parent="purchase.menu_procurement_management"
+          action="action_purchase_order_line_custom"
+          sequence="25"/>
+
 </odoo>

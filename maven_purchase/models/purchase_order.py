@@ -7,6 +7,35 @@ class PurchaseOrder(models.Model):
 
     show_discount = fields.Boolean(string="Show Discount")
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            date_order = vals.get('date_order') or fields.Datetime.now()
+            fy = self._get_fiscal_year(fields.Datetime.to_datetime(date_order))
+
+            sequence_code = f"purchase.order.{fy}"
+
+            seq = self.env['ir.sequence'].next_by_code(sequence_code)
+
+            if not seq:
+                self.env['ir.sequence'].create({
+                    'name': f"Purchase Order {fy}",
+                    'code': sequence_code,
+                    'prefix': f"PO/{fy}/",
+                    'padding': 4,
+                    'company_id': vals.get('company_id') or self.env.company.id,
+                })
+                seq = self.env['ir.sequence'].next_by_code(sequence_code)
+
+            vals['name'] = seq
+
+        return super().create(vals_list)
+
+    def _get_fiscal_year(self, dt):
+        if dt.month >= 4:
+            return f"{str(dt.year)[-2:]}-{str(dt.year + 1)[-2:]}"
+        return f"{str(dt.year - 1)[-2:]}-{str(dt.year)[-2:]}"
+
     def get_merged_report_lines(self):
         self.ensure_one()
         merged_lines = self.env['purchase.order.line'].browse()
@@ -139,6 +168,7 @@ class PurchaseOrderLine(models.Model):
         store=True
     )
     price_unit = fields.Float(string="LP")
+    purchase_for_id = fields.Many2one('purchase.for', string="Pur. For")
 
     @api.depends('price_unit', 'product_qty', 'discount')
     def _compute_unit_rate(self):
