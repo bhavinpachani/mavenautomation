@@ -34,17 +34,17 @@ class AccountMove(models.Model):
                 precision = move.currency_id.rounding or 0.01
 
                 # 🔴 Compare Quantity
-                if not self._is_equal(po_line.product_qty, line.quantity, precision):
-                    raise UserError(_(
-                        "Quantity mismatch!\n\n"
-                        "Product: %s\n"
-                        "PO Qty: %s\n"
-                        "Bill Qty: %s"
-                    ) % (
-                                        line.product_id.display_name,
-                                        po_line.product_qty,
-                                        line.quantity
-                                    ))
+                # if not self._is_equal(po_line.product_qty, line.quantity, precision):
+                #     raise UserError(_(
+                #         "Quantity mismatch!\n\n"
+                #         "Product: %s\n"
+                #         "PO Qty: %s\n"
+                #         "Bill Qty: %s"
+                #     ) % (
+                #                         line.product_id.display_name,
+                #                         po_line.product_qty,
+                #                         line.quantity
+                #                     ))
 
                 # 🔴 Compare Subtotal (IMPORTANT)
                 if not self._is_equal(po_line.price_subtotal, line.price_subtotal, precision):
