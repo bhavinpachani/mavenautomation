@@ -18,7 +18,7 @@ class AccountMove(models.Model):
                 if not po:
                     continue
 
-                # Match PO line
+                # Match PO line by product
                 po_line = po.order_line.filtered(
                     lambda l: l.product_id == line.product_id
                 )
@@ -28,35 +28,22 @@ class AccountMove(models.Model):
                         "No matching Purchase Order line found for product: %s"
                     ) % line.product_id.display_name)
 
-                # If multiple, take first (can improve later)
+                # Take first match
                 po_line = po_line[0]
 
                 precision = move.currency_id.rounding or 0.01
 
-                # 🔴 Compare Quantity
-                # if not self._is_equal(po_line.product_qty, line.quantity, precision):
-                #     raise UserError(_(
-                #         "Quantity mismatch!\n\n"
-                #         "Product: %s\n"
-                #         "PO Qty: %s\n"
-                #         "Bill Qty: %s"
-                #     ) % (
-                #                         line.product_id.display_name,
-                #                         po_line.product_qty,
-                #                         line.quantity
-                #                     ))
-
-                # 🔴 Compare Subtotal (IMPORTANT)
-                if not self._is_equal(po_line.price_subtotal, line.price_subtotal, precision):
+                # 🔴 Compare Unit Rate only
+                if not self._is_equal(po_line.unit_rate, line.price_unit, precision):
                     raise UserError(_(
-                        "Subtotal mismatch!\n\n"
+                        "Unit Rate mismatch!\n\n"
                         "Product: %s\n"
-                        "PO Subtotal: %s\n"
-                        "Bill Subtotal: %s"
+                        "PO Unit Rate: %s\n"
+                        "Bill Unit Rate: %s"
                     ) % (
                                         line.product_id.display_name,
-                                        po_line.price_subtotal,
-                                        line.price_subtotal
+                                        po_line.unit_rate,
+                                        line.price_unit
                                     ))
 
         return super().action_post()
