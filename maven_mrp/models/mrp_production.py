@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
-    bom_updated = fields.Boolean(default=False)
+    bom_updated = fields.Boolean(default=False, copy=False)
 
     def action_update_bom(self):
         for mo in self:
@@ -16,7 +16,7 @@ class MrpProduction(models.Model):
             # Collect components from MO (only qty > 0)
             lines_to_keep = []
             for move in mo.move_raw_ids:
-                qty = move.product_uom_qty
+                qty = move.quantity
                 if qty > 0:
                     lines_to_keep.append((move.product_id, qty))
 
