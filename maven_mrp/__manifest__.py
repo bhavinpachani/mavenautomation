@@ -11,7 +11,8 @@
     'author': 'Maven Automation MRP',
     'website': 'https://www.mavenautomation.in',
     'depends': [
-        'mrp'
+        'mrp',
+        'account'
     ],
     'data': [
         'security/ir.model.access.csv',
