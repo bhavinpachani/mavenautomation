@@ -15,6 +15,10 @@
             <xpath expr="//field[@name='invoice_date']" position="attributes">
                 <attribute name="required">move_type in ('out_invoice')</attribute>
             </xpath>
+            <!-- Add after discount field in invoice lines -->
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='discount']" position="after">
+                <field name="unit_rate"/>
+            </xpath>
             <xpath expr="//field[@name='invoice_date']" position="after">
 
                 <!-- Payment Reference -->

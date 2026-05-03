@@ -104,7 +104,7 @@ class PurchaseOrder(models.Model):
                 'name': line.name,
                 'quantity': qty_to_bill,
                 'product_uom_id': line.product_uom_id.id,
-                'price_unit': line.unit_rate,
+                'price_unit': line.price_unit,
                 'discount': line.discount,
                 'tax_ids': [(6, 0, line.tax_ids.ids)],
                 'analytic_distribution': line.analytic_distribution,
