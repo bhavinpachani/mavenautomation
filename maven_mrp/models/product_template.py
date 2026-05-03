@@ -1,49 +1,47 @@
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo import models, fields, api
 
-class MrpProduction(models.Model):
-    _inherit = "mrp.production"
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
 
-    bom_updated = fields.Boolean(default=False)
+    mrp_ok = fields.Boolean(default=False)
 
-    def action_update_bom(self):
-        for mo in self:
-            if not mo.bom_id:
-                raise UserError("No BoM found on this Manufacturing Order.")
+    def _get_fiscal_year(self, dt):
+        if dt.month >= 4:
+            return f"{str(dt.year)[-2:]}-{str(dt.year + 1)[-2:]}"
+        return f"{str(dt.year - 1)[-2:]}-{str(dt.year)[-2:]}"
 
-            bom = mo.bom_id
+    def _get_or_create_sequence(self, fy):
+        sequence_code = f"product.template.{fy}"
+        seq = self.env['ir.sequence'].next_by_code(sequence_code)
+        if not seq:
+            self.env['ir.sequence'].sudo().create({
+                'name': f"Panel Product {fy}",
+                'code': sequence_code,
+                'prefix': f"WO/{fy}/",
+                'padding': 4,
+                'company_id': self.env.company.id,
+            })
+            seq = self.env['ir.sequence'].next_by_code(sequence_code)
+        return seq
 
-            # Collect components from MO (only qty > 0)
-            lines_to_keep = []
-            for move in mo.move_raw_ids:
-                qty = move.product_uom_qty
-                if qty > 0:
-                    lines_to_keep.append((move.product_id, qty))
+    @api.model
+    def default_get(self, fields_list):
+        """Pre-fill name with a draft placeholder so form can open."""
+        res = super().default_get(fields_list)
+        is_mrp = self.env.context.get('default_mrp_ok', False)
+        if is_mrp and 'name' in fields_list:
+            res['name'] = 'New'   # placeholder — replaced on actual save
+            res['mrp_ok'] = True
+        return res
 
-            if not lines_to_keep:
-                raise UserError("No components with quantity > 0 found.")
-
-            # Remove existing BoM lines
-            bom.bom_line_ids.unlink()
-
-            # Create new BoM lines
-            bom_lines = []
-            for product, qty in lines_to_keep:
-                bom_lines.append((0, 0, {
-                    'product_id': product.id,
-                    'product_qty': qty,
-                    'product_uom_id': product.uom_id.id,
-                }))
-
-            bom.write({'bom_line_ids': bom_lines})
-            mo.bom_updated = True
-
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Success'),
-                    'message': _('BoM updated successfully from Manufacturing Order components.'),
-                    'type': 'success',
-                }
-            }
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            is_mrp = vals.get('mrp_ok', self.env.context.get('default_mrp_ok', False))
+            if is_mrp:
+                create_date = fields.Datetime.now()
+                fy = self._get_fiscal_year(create_date)
+                seq = self._get_or_create_sequence(fy)
+                vals['name'] = seq
+                vals['mrp_ok'] = True
+        return super().create(vals_list)
