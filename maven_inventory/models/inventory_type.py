@@ -11,12 +11,15 @@ class InventoryType(models.Model):
     _description = "Product Make"
 
     name = fields.Char(string="Make")
+    is_default_make = fields.Boolean(string="Default Make")
 
-    @api.constrains('name')
+    @api.constrains('name', 'is_default_make')
     def _check_name(self):
         for rec in self:
             if self.search_count([('name', '=', rec.name)]) > 1:
                 raise ValidationError("Name must be unique!")
+            if self.search_count([('is_default_make', '=', True)]) > 1:
+                raise ValidationError("Only one Make can be a default.")
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:

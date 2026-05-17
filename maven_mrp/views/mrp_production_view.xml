@@ -16,6 +16,13 @@
                     invisible="state != 'done' or bom_updated"/>
             </xpath>
 
+            <xpath expr="//button[@name='do_unreserve']"
+               position="attributes">
+                <attribute name="invisible">
+                    state not in ('confirmed', 'progress')
+                </attribute>
+            </xpath>
+
         </field>
     </record>
 

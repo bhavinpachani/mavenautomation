@@ -6,6 +6,27 @@ class MrpProduction(models.Model):
 
     bom_updated = fields.Boolean(default=False, copy=False)
 
+    def do_unreserve(self):
+        for production in self:
+
+            raw_moves = production.move_raw_ids.filtered(
+                lambda m: m.state not in ('done', 'cancel')
+            )
+
+            for move in raw_moves:
+
+                # Clear consumed qty
+                for line in move.move_line_ids:
+                    line.quantity = 0
+
+                # Unreserve
+                move._do_unreserve()
+
+                # Recompute
+                move._recompute_state()
+
+        return True
+
     def action_update_bom(self):
         for mo in self:
             if not mo.bom_id:

@@ -30,6 +30,10 @@ class ProductTemplate(models.Model):
         res = super().default_get(fields_list)
         is_mrp = self.env.context.get('default_mrp_ok', False)
         if is_mrp and 'name' in fields_list:
+            make_id = self.env['inventory.type'].search([('is_default_make', '=', True)],
+                                                        limit=1)
+            if make_id:
+                res['inv_type_id'] = make_id.id
             res['name'] = 'New'   # placeholder — replaced on actual save
             res['mrp_ok'] = True
         return res

@@ -20,7 +20,8 @@
             <form string="Inventory Type">
                 <sheet>
                     <group>
-                        <field name="name"/>
+                        <field name="name" required="1"/>
+                        <field name="is_default_make" />
                     </group>
                 </sheet>
             </form>
