@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            Dedicated security group that restricts Many2one Create/Edit globally.
+            Assign this group to any user who should be blocked from using
+            Create, Create & Edit, Quick Create, or Open/Edit on M2O fields.
+        -->
+        <record id="group_restrict_m2o_create_edit" model="res.groups">
+            <field name="name">Restrict Many2one Create/Edit</field>
+            <field name="comment">Users in this group cannot Create, Create and Edit, Quick Create, or Open/Edit records from any Many2one field in the system.</field>
+        </record>
+    </data>
+</odoo>

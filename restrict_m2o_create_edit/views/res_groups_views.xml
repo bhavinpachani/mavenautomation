@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit the res.groups form view to add the restrict_many2one_create_edit field -->
+        <record id="view_groups_form_inherit_restrict_m2o" model="ir.ui.view">
+            <field name="name">res.groups.form.inherit.restrict.m2o</field>
+            <field name="model">res.groups</field>
+            <field name="inherit_id" ref="base.view_groups_form"/>
+            <field name="arch" type="xml">
+                <field name="share" position="after">
+                    <field name="restrict_many2one_create_edit"
+                           help="If enabled, users in this group cannot Create, Create &amp; Edit, Quick Create, or Open/Edit records from any Many2one field."/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Also add to the list view for visibility -->
+        <record id="view_groups_list_inherit_restrict_m2o" model="ir.ui.view">
+            <field name="name">res.groups.list.inherit.restrict.m2o</field>
+            <field name="model">res.groups</field>
+            <field name="inherit_id" ref="base.view_groups_list"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="restrict_many2one_create_edit" optional="hide"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>
