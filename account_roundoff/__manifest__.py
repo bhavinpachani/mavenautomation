@@ -15,7 +15,9 @@
         'views/res_config_settings_view.xml',
         'views/account_move_view.xml',
         'views/sale_view.xml',
-        'views/purchase_view.xml'
+        'views/purchase_view.xml',
+        'views/sale_order_report.xml',
+        'views/purchase_order_report.xml'
     ],
     'images': ['static/description/banner.png'], 
     'installable' : True,

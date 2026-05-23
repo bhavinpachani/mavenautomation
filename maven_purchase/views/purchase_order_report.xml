@@ -4,6 +4,15 @@
 
         <!-- Remove Expected Arrival from Header -->
         <xpath expr="//div[@id='informations']/div[@t-if='o.date_planned']" position="replace"/>
+
+        <!-- Add bold "Supplier Address:" label above vendor address -->
+        <xpath expr="//t[@t-set='address']" position="replace">
+            <t t-set="address">
+                <strong class="d-block mb-1">Supplier Address:</strong>
+                <div t-field="o.partner_id"
+                     t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'/>
+            </t>
+        </xpath>
         
         <!-- Calculate product sums and select first lines to display -->
         <xpath expr="//tbody" position="before">

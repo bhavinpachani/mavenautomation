@@ -77,6 +77,21 @@ class AccountMove(models.Model):
                     values = self._construct_values(account_id, sale.amount_round_off)
                     vals['invoice_line_ids'].append(values)
 
+            # Vendor Bills from Purchase Orders
+            # PO's action_create_invoice doesn't pass active_model in context,
+            # so we match via invoice_origin which holds the PO name.
+            elif vals.get('move_type') == 'in_invoice' and vals.get('invoice_origin'):
+                po_names = [n.strip() for n in vals['invoice_origin'].split(',')]
+                purchases = self.env['purchase.order'].search([
+                    ('name', 'in', po_names),
+                    ('is_enabled_roundoff', '=', True),
+                ])
+                if purchases:
+                    total_round_off = sum(purchases.mapped('amount_round_off'))
+                    if total_round_off:
+                        values = self._construct_values(account_id, total_round_off)
+                        vals['invoice_line_ids'].append(values)
+
             elif vals.get('round_active') and vals.get('round_off_amount'):
                 # Direct creation with roundoff (e.g. from PO)
                 round_off_amount = vals['round_off_amount']
