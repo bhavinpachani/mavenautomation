@@ -140,14 +140,14 @@
             </t>
         </xpath>
 
-        <!-- Format Description to bold default_code -->
+        <!-- Format Description to bold product name -->
         <xpath expr="//td[@id='product']/span[@t-field='line.name']" position="replace">
             <t t-if="line.product_id">
                 <t t-if="line.product_id.default_code">
-                    <strong>[<span t-out="line.product_id.default_code"/>]</strong> <span t-out="line.product_id.name"/>
+                    [<span t-out="line.product_id.default_code"/>] <strong><span t-out="line.product_id.name"/></strong>
                 </t>
                 <t t-else="">
-                    <span t-out="line.product_id.name"/>
+                    <strong><span t-out="line.product_id.name"/></strong>
                 </t>
             </t>
             <t t-else="">
