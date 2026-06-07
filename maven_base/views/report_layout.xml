@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Override the standard external layout footer to center-align all content
+         matching the Maven Automation PDF footer style:
+         Row 1: company.report_footer (email, website, GSTIN) — centered, border-top
+         Row 2: Bank details (part of report_footer HTML) — centered, border-top
+         Row 3: Page X of Y — centered
+    -->
+        <template id="external_layout_standard_footer_inherit"
+              inherit_id="web.external_layout_standard">
+
+            <xpath expr="//div[hasclass('o_footer_content','d-flex','border-top','pt-2')]"
+                   position="replace">
+
+                <div class="o_footer_content">
+
+                    <!-- First line -->
+                    <div style="border-top:1px solid #000; margin-top:5px; padding-top:5px;">
+                        <table style="width:100%; text-align:center; font-size:13px;">
+                            <tr>
+                                <td>
+                                    ✉ sales@mavenautomation.com
+                                </td>
+                                <td>
+                                    🌐 www.mavenautomation.com
+                                </td>
+                                <td>
+                                    🏢 GSTIN: 24AATFM9159K1ZG
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Second line -->
+                    <div style="border-top:1px solid #000; margin-top:5px; padding-top:5px; text-align:center;">
+                        KOTAK MAHINDRA BANK A/C: 2045215746
+                        IFSC CODE: KKBK0002563
+                        BRANCH: ODHAV, AHMEDABAD
+                    </div>
+
+                    <!-- Page Number -->
+                    <div t-if="report_type == 'pdf'"
+                         class="text-center text-muted"
+                         style="margin-top:5px;">
+                        Page:
+                        <span class="page"/>
+                        of
+                        <span class="topage"/>
+                    </div>
+
+                </div>
+
+            </xpath>
+
+    </template>
+</odoo>

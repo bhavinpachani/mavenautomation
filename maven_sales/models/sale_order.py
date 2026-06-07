@@ -10,10 +10,11 @@ class SaleOrder(models.Model):
     store_file = fields.Char(string="File Name")
     po_no_ref = fields.Selection(
         [('verbal', 'Verbal'), ('po', 'PO File')],
+        tracking=1,
         string="Reference PO NO"
     )
-    payment_term_boolean = fields.Boolean(string="Payment Term Boolean")
-    po_description = fields.Char(string="PO Description")
+    # payment_term_boolean = fields.Boolean(string="Payment Term Boolean")
+    po_description = fields.Char(string="PO Description", tracking=1)
     advance_payment = fields.Float(string="Advance Payment")
 
     @api.constrains('po_no_ref', 'file', 'state')

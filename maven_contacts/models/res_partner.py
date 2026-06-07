@@ -19,6 +19,15 @@ class ResPartner(models.Model):
             if self.search_count([('name', '=', rec.name)]) > 1:
                 raise ValidationError("Name must be unique!")
 
+    @api.model
+    def default_get(self, fields):
+        res = super(ResPartner, self).default_get(fields)
+        if res:
+            res.update({
+                'l10n_in_gst_treatment': 'regular'
+            })
+        return res
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:

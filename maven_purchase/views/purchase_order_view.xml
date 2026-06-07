@@ -23,6 +23,7 @@
             <!-- Insert discount before subtotal -->
             <xpath expr="//field[@name='partner_ref']" position="after">
                 <field name="show_discount" string="Show Discount"/>
+                <field name="show_payment_term" string="Show Pay. Terms"/>
             </xpath>
 
             <xpath expr="//field[@name='date_planned']" position="attributes">

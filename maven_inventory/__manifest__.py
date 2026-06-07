@@ -13,7 +13,8 @@
         'security/ir.model.access.csv',
         'views/inventory_type_views.xml',
         'views/product_views.xml',
-        'views/product_removal_view.xml'
+        'views/product_removal_view.xml',
+        'views/stock_move_view.xml'
     ],
     'auto_install': True,
     'author': 'Odoo S.A.',

@@ -13,13 +13,13 @@
                 <field name="carrier_tracking_ref"/>
 
                 <field name="po_no_ref"
-                       readonly="state == 'sale'"/>
+                       readonly="state == 'cancel'"/>
 
-                <field name="payment_term_boolean"/>
+                <!--<field name="payment_term_boolean"/>-->
 
                 <field name="po_description"
                        required="po_no_ref == 'verbal'"
-                       readonly="state == 'sale'"/>
+                       readonly="state == 'cancel'"/>
 
                 <field name="store_file" invisible="1"/>
 
@@ -60,13 +60,14 @@
         </field>
     </record>
 
-    <record id="sale_margin_sale_order_add_fields" model="ir.ui.view">
-        <field name="name">sale.margin.sale.order.add.fields</field>
+    <record id="sale_margin_sale_order_hide_purchase_price" model="ir.ui.view">
+        <field name="name">sale.margin.sale.order.hide.purchase.price</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale_margin.sale_margin_sale_order"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='order_line']//field[@name='purchase_price']" position="attributes">
-                <attribute name="column_invisible">1</attribute>
+            <xpath expr="//field[@name='order_line']//list//field[@name='purchase_price']"
+                   position="attributes">
+                <attribute name="column_invisible">True</attribute>
             </xpath>
         </field>
     </record>

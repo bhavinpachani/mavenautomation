@@ -140,6 +140,14 @@
             </t>
         </xpath>
 
+        <!-- Conditional Visibility: Hide Payment Terms if show_payment_term is False -->
+        <xpath expr="//strong[contains(., 'Payment Terms')]" position="replace">
+            <strong t-if="o.show_payment_term">Payment Terms: </strong>
+        </xpath>
+        <xpath expr="//span[@t-field='o.payment_term_id']" position="attributes">
+            <attribute name="t-if">o.show_payment_term</attribute>
+        </xpath>
+
         <!-- Format Description to bold product name -->
         <xpath expr="//td[@id='product']/span[@t-field='line.name']" position="replace">
             <t t-if="line.product_id">

@@ -10,7 +10,8 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     inv_type_id = fields.Many2one('inventory.type', string="Make")
-    list_price = fields.Float(string="Sales LP")
+    list_price = fields.Float(string="Sales LP", tracking=True)
+    purchase_lp_price = fields.Float(string="Purchase LP", tracking=True)
 
     @api.constrains('name')
     def _check_name(self):

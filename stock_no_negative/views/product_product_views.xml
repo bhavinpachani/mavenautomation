@@ -11,7 +11,7 @@
         <field name="inherit_id" ref="stock.view_template_property_form" />
         <field name="arch" type="xml">
             <field name="categ_id" position="after">
-                <field name="allow_negative_stock" invisible="not is_storable" />
+                <field name="allow_negative_stock" groups="base.group_system" invisible="not is_storable" />
             </field>
         </field>
     </record>
@@ -21,7 +21,7 @@
         <field name="inherit_id" ref="stock.product_category_form_view_inherit" />
         <field name="arch" type="xml">
             <field name="removal_strategy_id" position="after">
-                <field name="allow_negative_stock" />
+                <field name="allow_negative_stock" groups="base.group_system"/>
             </field>
         </field>
     </record>

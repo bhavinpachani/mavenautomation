@@ -2,15 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Maven Contacts',
+    'name': 'Maven Base',
     'version': '1.0',
-    'category': 'Contacts',
+    'category': 'Base',
     'description': """
-                Contacts
+                Base
     """,
     'depends': ['base', 'web'],
     'data': [
-        'views/res_partner_views.xml',
+        'views/report_layout.xml'
     ],
     'auto_install': True,
     'author': 'Odoo S.A.',

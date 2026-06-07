@@ -13,7 +13,8 @@
     'depends': [
         'sale_management',
         'sale_margin',
-        'delivery'
+        'delivery',
+        'maven_inventory'
     ],
     'data': [
         'views/sale_order_view.xml',

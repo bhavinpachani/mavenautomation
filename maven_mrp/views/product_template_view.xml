@@ -26,7 +26,6 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="attributes">
                 <attribute name="readonly">mrp_ok</attribute>
-                <attribute name="placeholder">Auto-assigned on save: WO/YY-YY/XXXX</attribute>
             </xpath>
         </field>
     </record>

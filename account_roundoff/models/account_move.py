@@ -27,23 +27,39 @@ class AccountMove(models.Model):
         ),
     )
 
-    @api.depends('amount_total', 'round_active')
+    @api.depends('amount_total', 'round_active', 'invoice_line_ids.is_roundoff_line',
+                 'invoice_line_ids.price_unit')
     def _compute_roundoff_amounts(self):
         """
-        Compute round-off fields from the already-computed amount_total.
-        This runs AFTER Odoo's _compute_amount so amount_total is finalised.
+        Compute round-off fields.
+        If a roundoff invoice line already exists (injected from SO/PO),
+        use its value directly. Otherwise, calculate from amount_total.
         """
         for move in self:
-            if move.round_active and move.amount_total:
+            if not move.round_active or not move.amount_total:
+                move.round_off_value = 0.0
+                move.round_off_amount = 0.0
+                move.rounded_total = 0.0
+                continue
+
+            # Check for an existing roundoff line (e.g. from PO/SO bill creation)
+            roundoff_lines = move.invoice_line_ids.filtered(
+                lambda l: l.is_roundoff_line
+            )
+            if roundoff_lines:
+                # Use the roundoff line's value directly;
+                # amount_total already includes it, so it IS the rounded total.
+                round_off = sum(roundoff_lines.mapped('price_unit'))
+                move.round_off_value = round_off
+                move.round_off_amount = round_off
+                move.rounded_total = move.amount_total
+            else:
+                # No roundoff line yet — calculate from amount_total
                 amount_total_rounded = round(move.amount_total)
                 round_off = amount_total_rounded - move.amount_total
                 move.round_off_value = round_off
                 move.round_off_amount = round_off
                 move.rounded_total = amount_total_rounded
-            else:
-                move.round_off_value = 0.0
-                move.round_off_amount = 0.0
-                move.rounded_total = 0.0
 
     def _construct_values(self, account_id, amount):
         return (0, 0, {

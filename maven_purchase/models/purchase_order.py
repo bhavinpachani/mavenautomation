@@ -5,7 +5,8 @@ from odoo.exceptions import UserError, ValidationError
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    show_discount = fields.Boolean(string="Show Discount")
+    show_discount = fields.Boolean(string="Show Discount", copy=False)
+    show_payment_term = fields.Boolean(string="Show Discount", copy=False)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -169,6 +170,17 @@ class PurchaseOrderLine(models.Model):
     )
     price_unit = fields.Float(string="LP")
     purchase_for_id = fields.Many2one('purchase.for', string="Pur. For")
+
+    def _product_id_change(self):
+        res = super()._product_id_change()
+
+        for line in self:
+            if line.product_id:
+                lp_price = line.product_id.product_tmpl_id.purchase_lp_price
+                if lp_price:
+                    line.price_unit = lp_price
+
+        return res
 
     @api.depends('price_unit', 'product_qty', 'discount')
     def _compute_unit_rate(self):

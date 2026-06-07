@@ -24,3 +24,26 @@ class AccountMoveLine(models.Model):
                 line.unit_rate = total_after_discount / line.quantity
             else:
                 line.unit_rate = line.price_unit
+
+
+class AccountMove(models.Model):
+    _inherit = 'account.move'
+
+    @api.constrains('ref', 'partner_id', 'move_type', 'company_id')
+    def _check_unique_vendor_bill_ref(self):
+        for move in self:
+            if move.move_type != 'in_invoice' or not move.ref:
+                continue
+
+            duplicate = self.search_count([
+                ('move_type', '=', 'in_invoice'),
+                ('company_id', '=', move.company_id.id),
+                ('partner_id', '=', move.partner_id.id),
+                ('ref', '=', move.ref),
+                ('state', '!=', 'cancel'),
+            ])
+
+            if duplicate > 1:
+                raise ValidationError(
+                    f"Vendor Bill Reference '{move.ref}' already exists for this vendor."
+                )
