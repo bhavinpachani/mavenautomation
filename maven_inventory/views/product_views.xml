@@ -48,7 +48,7 @@
                 <attribute name="force_save">1</attribute>
             </xpath>
             <xpath expr="//div[@name='list_price_uom']" position="after">
-                <field name="purchase_lp_price" groups="base.group_system,purchase,group_purchase_manager"/>
+                <field name="purchase_lp_price" />
             </xpath>
         </field>
     </record>
