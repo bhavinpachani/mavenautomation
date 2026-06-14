@@ -20,6 +20,7 @@
                 <field name="unit_rate"/>
             </xpath>
             <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="invoice_number" invisible="move_type not in ('out_invoice', 'out_refund')" required="move_type in ('out_invoice', 'out_refund')"/>
 
                 <!-- Payment Reference -->
                 <field name="payment_reference"

@@ -126,6 +126,18 @@ class SaleOrderLine(models.Model):
     )
     price_subtotal = fields.Monetary(string="Subtotal")
 
+    def _reset_price_unit(self):
+        """Override to use purchase_lp_price from product template as the unit price."""
+        self.ensure_one()
+        lp_price = self.product_id.product_tmpl_id.purchase_lp_price
+        if lp_price:
+            self.update({
+                'price_unit': lp_price,
+                'technical_price_unit': lp_price,
+            })
+        else:
+            super()._reset_price_unit()
+
     @api.depends('price_unit', 'product_uom_qty', 'discount')
     def _compute_unit_rate(self):
         for line in self:

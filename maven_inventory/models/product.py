@@ -129,8 +129,8 @@ class ProductProduct(models.Model):
     def onchange_internal_reference(self):
         for product in self:
             if product.default_code:
-                product.default_code = internal_reference
                 internal_reference = product.default_code.upper()
+                product.default_code = internal_reference
                 product.description = internal_reference
                 product.description_sale = internal_reference
                 product.description_purchase = internal_reference

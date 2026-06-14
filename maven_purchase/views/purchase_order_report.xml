@@ -117,13 +117,15 @@
             <attribute name="t-if">o.show_discount</attribute>
         </xpath>
 
-        <!-- Replace Quantity with calculated sum -->
+        <!-- Replace Quantity with calculated sum + UoM -->
         <xpath expr="//span[@t-field='line.product_qty']" position="replace">
             <t t-if="line.product_id">
                 <span t-out="product_sums[line.product_id.id]"/>
+                <span t-if="line.product_uom_id" t-out="line.product_uom_id.name" class="ms-1"/>
             </t>
             <t t-else="">
                 <span t-field="line.product_qty"/>
+                <span t-if="line.product_uom_id" t-out="line.product_uom_id.name" class="ms-1"/>
             </t>
         </xpath>
 
@@ -146,6 +148,14 @@
         </xpath>
         <xpath expr="//span[@t-field='o.payment_term_id']" position="attributes">
             <attribute name="t-if">o.show_payment_term</attribute>
+        </xpath>
+
+        <!-- Limit Description column width and enable text wrapping -->
+        <xpath expr="//th[@name='th_description']" position="attributes">
+            <attribute name="style">width:40%; word-wrap:break-word;</attribute>
+        </xpath>
+        <xpath expr="//td[@id='product']" position="attributes">
+            <attribute name="style">max-width:250px; word-wrap:break-word; white-space:normal;</attribute>
         </xpath>
 
         <!-- Format Description to bold product name -->

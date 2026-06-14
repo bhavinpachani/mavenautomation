@@ -29,6 +29,10 @@ class AccountMoveLine(models.Model):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    invoice_number = fields.Char(
+        string="Invoice Number",
+        copy=False)   
+
     @api.constrains('ref', 'partner_id', 'move_type', 'company_id')
     def _check_unique_vendor_bill_ref(self):
         for move in self:
