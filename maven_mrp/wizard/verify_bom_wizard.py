@@ -76,6 +76,10 @@ class VerifyBOMWizard(models.TransientModel):
                 col0.font = red_font
                 all_valid = False
 
+            # Convert to uppercase for import compatibility
+            if val0:
+                col0.value = val0.upper()
+
             # -----------------------------
             # ROW[1] CHECK
             # -----------------------------
@@ -91,6 +95,10 @@ class VerifyBOMWizard(models.TransientModel):
             else:
                 col1.font = red_font
                 all_valid = False
+
+            # Convert to uppercase for import compatibility
+            if val1:
+                col1.value = val1.upper()
 
             # -----------------------------
             # NEVER TOUCH QTY
