@@ -67,7 +67,7 @@ class VerifyBOMWizard(models.TransientModel):
 
             if val0:
                 found0 = bool(product_model.search([
-                    ('name', '=ilike', val0)
+                    ('name', 'ilike', val0)
                 ], limit=1))
 
             if found0:
@@ -83,7 +83,7 @@ class VerifyBOMWizard(models.TransientModel):
 
             if val1:
                 found1 = bool(product_model.search([
-                    ('name', '=ilike', val1)
+                    ('name', 'ilike', val1)
                 ], limit=1))
 
             if found1:
