@@ -90,14 +90,14 @@
 
         <!-- Change Description header to Product -->
         <xpath expr="//th[@name='th_description']" position="replace">
-            <th name="th_description" class="text-start"><strong>Product</strong></th>
+            <th name="th_description" class="text-start">Product</th>
         </xpath>
 
         <!-- Format product name: bold product name with optional [code] prefix -->
         <xpath expr="//td[@name='td_product_name']/span[@t-field='line.name']" position="replace">
             <t t-if="line.product_id">
                 <t t-if="line.product_id.default_code">
-                    [<span t-out="line.product_id.default_code"/>] <strong><span t-out="line.product_id.name"/></strong>
+                    [<span t-out="line.product_id.default_code"/> ] <strong><span t-out="line.product_id.name"/></strong>
                 </t>
                 <t t-else="">
                     <strong><span t-out="line.product_id.name"/></strong>
