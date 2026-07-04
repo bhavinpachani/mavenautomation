@@ -19,13 +19,13 @@
                         <table style="width:100%; text-align:center; font-size:13px;">
                             <tr>
                                 <td>
-                                    ✉ sales@mavenautomation.com
+                                    <i class="fa fa-envelope"/> sales@mavenautomation.com
                                 </td>
                                 <td>
-                                    🌐 www.mavenautomation.com
+                                    <i class="fa fa-globe"/> www.mavenautomation.com
                                 </td>
                                 <td>
-                                    🏢 GSTIN: 24AATFM9159K1ZG
+                                    <i class="fa fa-building"/> GSTIN: 24AATFM9159K1ZG
                                 </td>
                             </tr>
                         </table>

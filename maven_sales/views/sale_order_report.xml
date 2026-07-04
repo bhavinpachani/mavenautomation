@@ -7,9 +7,14 @@
             <t t-set="display_discount" t-value="False"/>
         </xpath>
 
-        <!-- Force taxes to display unconditionally -->
+        <!-- Add "Billing Address:" header above partner_id -->
+        <xpath expr="//t[@t-set='address']//div[@t-field='doc.partner_id']" position="before">
+            <strong class="d-block mb-1">Billing Address:</strong>
+        </xpath>
+
+        <!-- Hide taxes column -->
         <xpath expr="//t[@t-set='display_taxes']" position="replace">
-            <t t-set="display_taxes" t-value="True"/>
+            <t t-set="display_taxes" t-value="False"/>
         </xpath>
 
         <!-- Initialize Sequence Counter -->
@@ -19,7 +24,7 @@
 
         <!-- Add Sequence Header -->
         <xpath expr="//th[@name='th_description']" position="before">
-            <th name="th_sequence" class="text-center">Sr. No.</th>
+            <th name="th_sequence" class="text-center">No.</th>
         </xpath>
 
         <!-- Change Header Unit Price -> Unit Rate AND add Delivery Time -->
@@ -66,27 +71,41 @@
             </td>
         </xpath>
 
-        <!-- Replace the tax column to explicitly use the tax_id field -->
-        <xpath expr="//td[@name='td_product_taxes']" position="replace">
-            <td name="td_product_taxes" class="text-end text-nowrap">
-                <!-- Natively the relationship is tax_id, replacing default taxonomy layout -->
-                <span t-field="line.tax_ids"/>
-            </td>
-        </xpath>
+
 
         <!-- Ensure colspans are adjusted for the new Delivery Time and Sequence columns -->
         <!-- section_name spans BOTH sequence and delivery time so it expands by 2: 3 + 2 = 5 -->
         <xpath expr="//t[@t-set='section_name_colspan'][@t-value]" position="replace">
-            <t t-set="section_name_colspan" t-value="5 + (1 if display_discount else 0) + (1 if display_taxes else 0)"/>
+            <t t-set="section_name_colspan" t-value="5 + (1 if display_discount else 0)"/>
         </xpath>
         <!-- combo_name has its own sequence cell prepended, so it only shifts and expands by 1: 3 + 1 = 4 -->
         <xpath expr="//td[@name='td_combo_name']" position="attributes">
-            <attribute name="t-att-colspan">4 + (1 if display_discount else 0) + (1 if display_taxes else 0)</attribute>
+            <attribute name="t-att-colspan">4 + (1 if display_discount else 0)</attribute>
         </xpath>
 
         <!-- Add an empty cell to the section summary for the new Delivery Time column -->
         <xpath expr="//td[@name='td_section_group_priceunit']" position="before">
             <td name="td_section_group_lead_time"/>
+        </xpath>
+
+        <!-- Change Description header to Product -->
+        <xpath expr="//th[@name='th_description']" position="replace">
+            <th name="th_description" class="text-start"><strong>Product</strong></th>
+        </xpath>
+
+        <!-- Format product name: bold product name with optional [code] prefix -->
+        <xpath expr="//td[@name='td_product_name']/span[@t-field='line.name']" position="replace">
+            <t t-if="line.product_id">
+                <t t-if="line.product_id.default_code">
+                    [<span t-out="line.product_id.default_code"/>] <strong><span t-out="line.product_id.name"/></strong>
+                </t>
+                <t t-else="">
+                    <strong><span t-out="line.product_id.name"/></strong>
+                </t>
+            </t>
+            <t t-else="">
+                <span t-field="line.name"/>
+            </t>
         </xpath>
 
     </template>

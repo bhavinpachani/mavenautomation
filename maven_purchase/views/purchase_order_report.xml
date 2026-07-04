@@ -44,7 +44,7 @@
 
         <!-- Sequence Header -->
         <xpath expr="//th[@name='th_description']" position="before">
-            <th name="th_sequence" class="text-center"><strong>Sr. No.</strong></th>
+            <th name="th_sequence" class="text-center"><strong>No.</strong></th>
         </xpath>
 
         <!-- Sequence Column Data -->
@@ -57,7 +57,7 @@
 
         <!-- Expected Date Header -->
         <xpath expr="//th[@name='th_price_unit']" position="before">
-            <th name="th_date_planned" class="text-start"><strong>Expected Date</strong></th>
+            <th name="th_date_planned" class="text-start"><strong>Delivery Dt.</strong></th>
         </xpath>
 
         <!-- Expected Date Data -->
@@ -84,22 +84,11 @@
             <th name="th_subtotal" class="text-end"><strong>Subtotal</strong></th>
         </xpath>
 
-        <!-- Move Tax Header after Amount/Subtotal -->
+        <!-- Remove Tax Header -->
         <xpath expr="//th[@name='th_taxes']" position="replace"/>
-        <xpath expr="//th[@name='th_subtotal']" position="after">
-            <th name="th_taxes" class="text-end"><strong>Taxes</strong></th>
-        </xpath>
 
-        <!-- Move Tax Data after Amount/Subtotal -->
-        <!-- Replace the old tax cell which is exactly the preceding sibling to the subtotal cell -->
+        <!-- Remove Tax Data -->
         <xpath expr="//td[span[@t-field='line.price_subtotal']]/preceding-sibling::td[1]" position="replace"/>
-        
-        <!-- Insert the new tax cell after the subtotal cell -->
-        <xpath expr="//td[span[@t-field='line.price_subtotal']]" position="after">
-            <td name="td_taxes" class="text-end">
-                <span t-out="', '.join(tax.tax_label for tax in line.tax_ids if tax.tax_label)"/>
-            </td>
-        </xpath>
 
         <!-- Conditional Visibility: Hide Unit Price Header and Data if o.show_discount == True -->
         <xpath expr="//th[@name='th_price_unit']" position="attributes">
@@ -150,10 +139,11 @@
             <attribute name="t-if">o.show_payment_term</attribute>
         </xpath>
 
-        <!-- Limit Description column width and enable text wrapping -->
-        <xpath expr="//th[@name='th_description']" position="attributes">
-            <attribute name="style">width:40%; word-wrap:break-word;</attribute>
+        <!-- Change Description header to Product -->
+        <xpath expr="//th[@name='th_description']" position="replace">
+            <th name="th_description" style="width:40%; word-wrap:break-word;"><strong>Product</strong></th>
         </xpath>
+
         <xpath expr="//td[@id='product']" position="attributes">
             <attribute name="style">max-width:250px; word-wrap:break-word; white-space:normal;</attribute>
         </xpath>
