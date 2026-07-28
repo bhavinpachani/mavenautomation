@@ -1,0 +1,19 @@
+<odoo>
+<record model="ir.module.category" id="security_access_groups">
+        <field name="name">Access Rights</field>
+    </record>
+
+    <record model="res.groups" id="group_access_user">
+        <field name="name">Access User</field>
+    </record>
+
+    <record model="res.groups" id="group_access_manager">
+        <field name="name">Access Manager</field>
+        <!-- `category_id` was removed from `res.groups` in newer Odoo versions; keep group without it -->
+        <field name="implied_ids" eval="[(4, ref('zehntech_hide_and_show_chatter.group_access_user'))]" />
+    </record>
+
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('zehntech_hide_and_show_chatter.group_access_manager'))]" />
+    </record>
+</odoo>
