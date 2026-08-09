@@ -111,7 +111,7 @@
       <xpath expr="//td[@name='td_product_name']/span[@t-field='line.name']" position="replace">
           <t t-if="line.product_id">
               <t t-if="line.product_id.default_code">
-                  <strong>[<span t-out="line.product_id.name"/>]</strong><br/><span t-field="line.product_id.default_code"/>
+                  <strong><span t-out="line.product_id.name"/></strong><br/>[<span t-field="line.product_id.default_code"/>]
               </t>
               <t t-else="">
                   <span t-field="line.product_id.name"/>
