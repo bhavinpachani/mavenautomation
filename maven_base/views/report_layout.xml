@@ -9,6 +9,12 @@
         <template id="external_layout_standard_footer_inherit"
               inherit_id="web.external_layout_standard">
 
+            <!-- Hide GSTIN/Tax ID from company details in header -->
+            <xpath expr="//ul[@name='company_address_list']/li[not(@t-else) and @t-if='not forced_vat']"
+                   position="replace"/>
+            <xpath expr="//ul[@name='company_address_list']/li[@t-else='']"
+                   position="replace"/>
+
             <xpath expr="//div[hasclass('o_footer_content','d-flex','border-top','pt-2')]"
                    position="replace">
 
