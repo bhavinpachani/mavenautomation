@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Override the default A4 paperformat to increase header spacing,
+             preventing header/body overlap on page 2+ of multi-page reports -->
+        <record id="base.paperformat_euro" model="report.paperformat">
+            <field name="margin_top">65</field>
+            <field name="header_spacing">65</field>
+        </record>
+    </data>
+</odoo>
