@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_order_form_import_sol" model="ir.ui.view">
+        <field name="name">sale.order.form.import.sol</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(maven_import_sale_order_line.action_import_sale_order_line_wizard)d"
+                        type="action"
+                        string="Import SOL"
+                        class="btn-secondary"
+                        invisible="state != 'draft' or not id"
+                        context="{'default_sale_order_id': id}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
