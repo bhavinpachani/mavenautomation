@@ -10,7 +10,9 @@
     """,
     'depends': ['base', 'web'],
     'data': [
+        'security/ir.model.access.csv',
         'views/res_partner_views.xml',
+        'views/res_partner_type_views.xml'
     ],
     'auto_install': True,
     'author': 'Odoo S.A.',

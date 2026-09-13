@@ -31,6 +31,23 @@
                 </div>
             </xpath>
 
+            <xpath expr="//field[@name='industry_id']" position="after">
+                <field name="contact_type_id" options="{'no_create': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_partner_tree_inherit_contact_type" model="ir.ui.view">
+        <field name="name">res.partner.tree.inherit.contact.type</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='country_id']" position="after">
+                <field name="contact_type_id" />
+            </xpath>
+
         </field>
     </record>
 

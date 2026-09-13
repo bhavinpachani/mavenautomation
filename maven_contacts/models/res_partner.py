@@ -12,6 +12,7 @@ class ResPartner(models.Model):
     contact_name = fields.Char(string="Contact Name")
     is_email_none = fields.Boolean(string="E.None")
     is_phone_none = fields.Boolean(string="M.None")
+    contact_type_id = fields.Many2one('contact.type', string="Contact Type")
 
     @api.constrains('name')
     def _check_name(self):
@@ -77,3 +78,47 @@ class ResPartner(models.Model):
 
             if rec.is_phone_none:
                 rec.phone = "N/A"
+
+
+class PartnerCategory(models.Model):
+    _inherit = 'res.partner.category'
+
+    @api.constrains('name')
+    def _check_name(self):
+        for rec in self:
+            if self.search_count([('name', '=', rec.name)]) > 1:
+                raise ValidationError("Name must be unique!")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name'):
+                vals['name'] = vals['name'].upper()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('name'):
+            vals['name'] = vals['name'].upper()
+        return super().write(vals)
+
+
+class PartnerIndustry(models.Model):
+    _inherit = 'res.partner.industry'
+
+    @api.constrains('name')
+    def _check_name(self):
+        for rec in self:
+            if self.search_count([('name', '=', rec.name)]) > 1:
+                raise ValidationError("Name must be unique!")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name'):
+                vals['name'] = vals['name'].upper()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('name'):
+            vals['name'] = vals['name'].upper()
+        return super().write(vals)

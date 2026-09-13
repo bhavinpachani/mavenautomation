@@ -2,3 +2,4 @@
 
 from . import ir_http
 from . import base_model
+from . import res_users
