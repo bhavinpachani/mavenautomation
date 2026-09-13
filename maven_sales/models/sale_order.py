@@ -37,18 +37,18 @@ class SaleOrder(models.Model):
 
             sequence_code = f"sale.order.{fy}"
 
-            seq = self.env['ir.sequence'].next_by_code(sequence_code)
+            seq = self.env['ir.sequence'].sudo().next_by_code(sequence_code)
 
             if not seq:
                 # create sequence dynamically if not exists
-                self.env['ir.sequence'].create({
+                self.env['ir.sequence'].sudo().create({
                     'name': f"Sale Order {fy}",
                     'code': sequence_code,
                     'prefix': f"SO/{fy}/",
                     'padding': 4,
                     'company_id': vals.get('company_id') or self.env.company.id,
                 })
-                seq = self.env['ir.sequence'].next_by_code(sequence_code)
+                seq = self.env['ir.sequence'].sudo().next_by_code(sequence_code)
 
             vals['name'] = seq
 

@@ -110,11 +110,9 @@
         <xpath expr="//span[@t-field='line.product_qty']" position="replace">
             <t t-if="line.product_id">
                 <span t-out="product_sums[line.product_id.id]"/>
-                <span t-if="line.product_uom_id" t-out="line.product_uom_id.name" class="ms-1"/>
             </t>
             <t t-else="">
                 <span t-field="line.product_qty"/>
-                <span t-if="line.product_uom_id" t-out="line.product_uom_id.name" class="ms-1"/>
             </t>
         </xpath>
 

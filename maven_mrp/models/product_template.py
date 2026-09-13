@@ -12,7 +12,7 @@ class ProductTemplate(models.Model):
 
     def _get_or_create_sequence(self, fy):
         sequence_code = f"product.template.{fy}"
-        seq = self.env['ir.sequence'].next_by_code(sequence_code)
+        seq = self.env['ir.sequence'].sudo().next_by_code(sequence_code)
         if not seq:
             self.env['ir.sequence'].sudo().create({
                 'name': f"Panel Product {fy}",
@@ -21,7 +21,7 @@ class ProductTemplate(models.Model):
                 'padding': 4,
                 'company_id': self.env.company.id,
             })
-            seq = self.env['ir.sequence'].next_by_code(sequence_code)
+            seq = self.env['ir.sequence'].sudo().next_by_code(sequence_code)
         return seq
 
     @api.model

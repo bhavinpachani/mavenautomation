@@ -16,17 +16,17 @@ class PurchaseOrder(models.Model):
 
             sequence_code = f"purchase.order.{fy}"
 
-            seq = self.env['ir.sequence'].next_by_code(sequence_code)
+            seq = self.env['ir.sequence'].sudo().next_by_code(sequence_code)
 
             if not seq:
-                self.env['ir.sequence'].create({
+                self.env['ir.sequence'].sudo().create({
                     'name': f"Purchase Order {fy}",
                     'code': sequence_code,
                     'prefix': f"PO/{fy}/",
                     'padding': 4,
                     'company_id': vals.get('company_id') or self.env.company.id,
                 })
-                seq = self.env['ir.sequence'].next_by_code(sequence_code)
+                seq = self.env['ir.sequence'].sudo().next_by_code(sequence_code)
 
             vals['name'] = seq
 

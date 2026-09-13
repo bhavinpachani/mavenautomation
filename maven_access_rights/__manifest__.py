@@ -12,7 +12,7 @@
         'base'
     ],
     'data': [
-        'security/maven_access_security.xml',
+        'security/maven_access_security.xml'
     ],
     'auto_install': True,
     'license': 'LGPL-3'
