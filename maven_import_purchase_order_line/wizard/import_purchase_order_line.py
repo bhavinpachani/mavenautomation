@@ -488,7 +488,7 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
             'product_id': product.id,
             'product_qty': quantity,
             'product_uom_id': uom.id,
-            'price_unit': price_unit,
+            'price_unit': lp_value,
             'purchase_for_id':  purchase_for_id and purchase_for_id.id or False,
             'discount': discount,
         }

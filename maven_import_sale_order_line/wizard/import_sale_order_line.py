@@ -373,7 +373,7 @@ class ImportSaleOrderLineWizard(models.TransientModel):
         if unit_rate is None:
             unit_rate = self._parse_float(row.get('LP', 0), 0.0)
         discount = self._parse_float(row.get('DISC.%', 0), 0.0)
-        customer_lead = self._parse_float(row.get('DEL. TIME', 0), 0.0)
+        customer_lead = str(row.get('DEL. TIME', ''))
         amount = self._cell_value(row.get('AMOUNT', ''))
         unit_name = self._cell_value(row.get('UNIT', ''))
         lp_value = self._cell_value(row.get('LP', ''))
@@ -437,7 +437,7 @@ class ImportSaleOrderLineWizard(models.TransientModel):
             'product_uom_id': uom.id,
             'price_unit': price_unit,
             'discount': discount,
-            'customer_lead': customer_lead,
+            'lead_time': customer_lead,
         }
         if taxes:
             line_vals['tax_ids'] = [(6, 0, taxes.ids)]
