@@ -76,8 +76,8 @@ class SaleOrder(models.Model):
 
             partner = order.partner_id
 
-            if validate_so_vat and not partner.vat:
-                missing_fields.append(_("VAT"))
+            if validate_so_vat and not partner.vat and partner.l10n_in_gst_treatment != 'unregistered':
+                missing_fields.append(_("GST"))
 
             if validate_so_email and not partner.email:
                 missing_fields.append(_("Email"))

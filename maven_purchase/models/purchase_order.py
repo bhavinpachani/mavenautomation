@@ -93,8 +93,8 @@ class PurchaseOrder(models.Model):
             validate_msgs = []
 
             # VAT
-            if validate_po_vat and not partner.vat:
-                validate_msgs.append("Vat")
+            if validate_po_vat and not partner.vat and not partner.vat and partner.l10n_in_gst_treatment != 'unregistered':
+                validate_msgs.append("GST")
 
             # Email
             if validate_po_email and not partner.email:

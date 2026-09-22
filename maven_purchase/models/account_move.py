@@ -34,7 +34,7 @@ class AccountMove(models.Model):
                 precision = move.currency_id.rounding or 0.01
 
                 # 🔴 Compare Unit Rate only
-                if not self._is_equal(po_line.unit_rate, line.price_unit, precision):
+                if not self._is_equal(po_line.unit_rate, line.unit_rate, precision):
                     raise UserError(_(
                         "Unit Rate mismatch!\n\n"
                         "Product: %s\n"
@@ -43,7 +43,7 @@ class AccountMove(models.Model):
                     ) % (
                                         line.product_id.display_name,
                                         po_line.unit_rate,
-                                        line.price_unit
+                                        line.unit_rate
                                     ))
 
         return super().action_post()
