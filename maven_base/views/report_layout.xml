@@ -1,74 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Override the standard external layout footer to center-align all content
-         matching the Maven Automation PDF footer style:
-         Row 1: company.report_footer (email, website, GSTIN) — centered, border-top
-         Row 2: Bank details (part of report_footer HTML) — centered, border-top
-         Row 3: Page X of Y — centered
+    <!-- Override the standard external layout:
+         Header: logo and company address side-by-side (not stacked)
+         Footer: centered Maven Automation style
+         (email / website / GSTIN, bank details, page X of Y)
     -->
-        <template id="external_layout_standard_footer_inherit"
+    <template id="external_layout_standard_footer_inherit"
               inherit_id="web.external_layout_standard">
 
-             <!-- Hide GSTIN/Tax ID from company details in header -->
-            <xpath expr="//ul[@name='company_address_list']/li[not(@t-else) and @t-if='not forced_vat']"
-                   position="replace"/>
-            <xpath expr="//ul[@name='company_address_list']/li[@t-else='']"
-                   position="replace"/>
+        <!-- Replace stacked logo + address header with side-by-side layout -->
+        <xpath expr="//div[contains(@t-attf-class, 'header')]" position="replace">
+            <div t-attf-class="header o_company_#{company.id}_layout">
+                <div class="d-flex align-items-start">
+                    <div class="me-3">
+                        <img t-if="company.logo" class="o_company_logo"
+                             t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        <div t-if="company.report_header"
+                             t-field="company.report_header"
+                             class="o_company_tagline fw-bold mt-1"/>
+                    </div>
+                    <div name="company_address">
+                        <ul class="list-unstyled mb-0" name="company_address_list">
+                            <li t-if="company.is_company_details_empty">
+                                <span t-field="company.partner_id"
+                                      t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                            </li>
+                            <li t-else="">
+                                <span t-field="company.company_details"/>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </xpath>
 
-            <xpath expr="//div[hasclass('o_footer_content','d-flex','border-top','pt-2')]"
-                   position="replace">
+        <xpath expr="//div[hasclass('o_footer_content','d-flex','border-top','pt-2')]"
+               position="replace">
 
-                <div class="o_footer_content">
+            <div class="o_footer_content">
 
-                    <!-- First line -->
-                    <div style="border-top:1px solid #000; margin-top:5px; padding-top:5px;">
-                        <table style="width:100%; text-align:center; font-size:13px;">
-                            <tr>
-                                <t t-if="o and o._name == 'sale.order'">
-                                    <td>
-                                        <i class="fa fa-envelope"/> sales@mavenautomation.com
-                                    </td>
-                                </t>
-                                <t t-elif="o and o._name == 'purchase.order'">
-                                    <td>
-                                        <i class="fa fa-envelope"/> purchase@mavenautomation.com
-                                    </td>
-                                </t>
-                                <t t-else="">
-                                    <td>
-                                        <i class="fa fa-envelope"/> sales@mavenautomation.com
-                                    </td>
-                                </t>
+                <!-- First line -->
+                <div style="border-top:1px solid #000; margin-top:5px; padding-top:5px;">
+                    <table style="width:100%; text-align:center; font-size:13px;">
+                        <tr>
+                            <t t-if="o and o._name == 'sale.order'">
                                 <td>
-                                    <i class="fa fa-globe"/> www.mavenautomation.com
+                                    <i class="fa fa-envelope"/> sales@mavenautomation.com
                                 </td>
+                            </t>
+                            <t t-elif="o and o._name == 'purchase.order'">
                                 <td>
-                                    <i class="fa fa-building"/> GSTIN: 24AATFM9159K1ZG
+                                    <i class="fa fa-envelope"/> purchase@mavenautomation.com
                                 </td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <!-- Second line -->
-                    <div style="border-top:1px solid #000; margin-top:5px; padding-top:5px; text-align:center;">
-                        KOTAK MAHINDRA BANK A/C: 2045215746
-                        IFSC CODE: KKBK0002563
-                        BRANCH: ODHAV, AHMEDABAD
-                    </div>
-
-                    <!-- Page Number -->
-                    <div t-if="report_type == 'pdf'"
-                         class="text-center text-muted"
-                         style="margin-top:5px;">
-                        Page:
-                        <span class="page"/>
-                        of
-                        <span class="topage"/>
-                    </div>
-
+                            </t>
+                            <t t-else="">
+                                <td>
+                                    <i class="fa fa-envelope"/> sales@mavenautomation.com
+                                </td>
+                            </t>
+                            <td>
+                                <i class="fa fa-globe"/> www.mavenautomation.com
+                            </td>
+                            <td>
+                                <i class="fa fa-building"/> GSTIN: 24AATFM9159K1ZG
+                            </td>
+                        </tr>
+                    </table>
                 </div>
 
-            </xpath>
+                <!-- Second line -->
+                <div style="border-top:1px solid #000; margin-top:5px; padding-top:5px; text-align:center;">
+                    KOTAK MAHINDRA BANK A/C: 2045215746
+                    IFSC CODE: KKBK0002563
+                    BRANCH: ODHAV, AHMEDABAD
+                </div>
+
+                <!-- Page Number -->
+                <div t-if="report_type == 'pdf'"
+                     class="text-center text-muted"
+                     style="margin-top:5px;">
+                    Page:
+                    <span class="page"/>
+                    of
+                    <span class="topage"/>
+                </div>
+
+            </div>
+
+        </xpath>
 
     </template>
 </odoo>
