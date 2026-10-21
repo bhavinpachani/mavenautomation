@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Domain
 import re
 
 
@@ -10,3 +11,64 @@ class AccountTax(models.Model):
     _inherit = 'account.tax'
 
     is_default_tax = fields.Boolean(string="Default Tax")
+    is_searchable = fields.Boolean(string="Searchable", default=False)
+
+    @api.onchange('is_default_tax', 'is_searchable')
+    def _onchange_default_tax_searchable(self):
+        if self.is_default_tax:
+            self.is_searchable = True
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('is_default_tax'):
+                vals['is_searchable'] = True
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('is_default_tax'):
+            vals = dict(vals, is_searchable=True)
+            return super().write(vals)
+        if vals.get('is_searchable') is False and 'is_default_tax' not in vals:
+            default_taxes = self.filtered('is_default_tax')
+            other_taxes = self - default_taxes
+            if default_taxes and other_taxes:
+                return super(AccountTax, other_taxes).write(vals)
+            if default_taxes:
+                return True
+        return super().write(vals)
+
+    @api.model
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        # Order-line tax dropdowns call name_search with their own domain.
+        domain = self._searchable_domain(domain)
+        return super().name_search(name, domain, operator, limit)
+
+    @api.model
+    def _searchable_domain(self, domain):
+        domain = Domain(domain or Domain.TRUE)
+        if (
+            self.env.context.get('searchable_test', True)
+            and not any(
+                condition.field_expr == 'is_searchable'
+                for condition in domain.iter_conditions()
+            )
+        ):
+            domain &= Domain('is_searchable', '=', True)
+        return domain
+
+    @api.model
+    def _search(self, domain, *args, **kwargs):
+        """Keep non-searchable taxes out of lookups unless the domain already filters this flag."""
+        domain = self._searchable_domain(domain)
+        return super()._search(domain, *args, **kwargs)
+
+    def init(self):
+        # New boolean columns are NULL, which does not match "is_searchable = True".
+        # Default taxes are always searchable.
+        self.env.cr.execute("""
+            UPDATE account_tax
+               SET is_searchable = TRUE
+             WHERE is_searchable IS NULL
+                OR is_default_tax IS TRUE
+        """)

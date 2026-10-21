@@ -9,8 +9,34 @@
 
             <xpath expr="//field[@name='active']" position="after">
                 <field name="is_default_tax"/>
+                <field name="is_searchable" widget="boolean_toggle" readonly="is_default_tax"/>
             </xpath>
 
+        </field>
+    </record>
+
+    <record id="view_tax_list_add_is_searchable" model="ir.ui.view">
+        <field name="name">account.tax.list.is.searchable</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_tax_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='active']" position="after">
+                <field name="is_default_tax" column_invisible="True"/>
+                <field name="is_searchable" widget="boolean_toggle" readonly="is_default_tax"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_tax_search_is_searchable" model="ir.ui.view">
+        <field name="name">account.tax.search.is.searchable</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_account_tax_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='inactive']" position="after">
+                <separator/>
+                <filter name="searchable" string="Searchable" domain="[('is_searchable', '=', True)]"/>
+                <filter name="not_searchable" string="Not Searchable" domain="[('is_searchable', '=', False)]"/>
+            </xpath>
         </field>
     </record>
 

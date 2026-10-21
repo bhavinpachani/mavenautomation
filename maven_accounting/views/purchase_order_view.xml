@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="purchase_order_form_searchable_tax" model="ir.ui.view">
+        <field name="name">purchase.order.form.searchable.tax</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='tax_ids']" position="attributes">
+                <attribute name="domain">[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id), ('active', '=', True), ('is_searchable', '=', True)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='tax_ids']" position="attributes">
+                <attribute name="domain">[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id), ('is_searchable', '=', True)]</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_line_form_searchable_tax" model="ir.ui.view">
+        <field name="name">purchase.order.line.form.searchable.tax</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tax_ids']" position="attributes">
+                <attribute name="domain">[('type_tax_use', '=', 'purchase'), ('is_searchable', '=', True)]</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
