@@ -36,7 +36,7 @@ class AccountMove(models.Model):
     @api.constrains('ref', 'partner_id', 'move_type', 'company_id')
     def _check_unique_vendor_bill_ref(self):
         for move in self:
-            if move.move_type != 'in_invoice' or not move.ref:
+            if move.move_type not in ('in_invoice', 'out_invoice') or not move.ref:
                 continue
 
             duplicate = self.search_count([
@@ -46,14 +46,13 @@ class AccountMove(models.Model):
                 ('ref', '=', move.ref),
                 ('state', '!=', 'cancel'),
             ])
-
             if duplicate > 1:
                 raise ValidationError(
                     f"Vendor Bill Reference '{move.ref}' already exists for this vendor."
                 )
 
     @api.constrains('invoice_number', 'partner_id', 'move_type', 'company_id')
-    def _check_unique_vendor_bill_ref(self):
+    def _check_unique_invoicer_ref(self):
         for move in self:
             if move.move_type != 'out_invoice' or not move.invoice_number:
                 continue
