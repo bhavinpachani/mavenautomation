@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_standalone_delivery" model="ir.ui.view">
+        <field name="name">stock.picking.form.standalone.delivery</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="is_standalone_delivery"
+                       invisible="picking_type_code != 'outgoing' or sale_id or state == 'cancel'"
+                       readonly="state != 'draft'"/>
+                <field name="inv_status"
+                       widget="badge"
+                       decoration-warning="inv_status == 'pending'"
+                       decoration-success="inv_status == 'invoiced'"
+                       invisible="not is_standalone_delivery or sale_id or picking_type_code != 'outgoing' or state == 'cancel'"
+                       readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_tree_standalone_delivery" model="ir.ui.view">
+        <field name="name">stock.picking.list.standalone.delivery</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="is_standalone_delivery"
+                       optional="show"
+                       readonly="state != 'draft'"
+                       column_invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+                <field name="inv_status"
+                       optional="show"
+                       widget="badge"
+                       decoration-warning="inv_status == 'pending'"
+                       decoration-success="inv_status == 'invoiced'"
+                       column_invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_search_standalone_delivery" model="ir.ui.view">
+        <field name="name">stock.picking.search.standalone.delivery</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='backorder']" position="after">
+                <separator invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+                <filter string="Standalone Delivery"
+                        name="standalone_delivery"
+                        domain="[('is_standalone_delivery', '=', True)]"
+                        invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+            </xpath>
+            <xpath expr="//filter[@name='status']" position="after">
+                <filter string="Invoice Status"
+                        name="group_by_inv_status"
+                        context="{'group_by': 'inv_status'}"
+                        invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
