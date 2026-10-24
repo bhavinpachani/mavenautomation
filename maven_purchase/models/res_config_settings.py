@@ -18,7 +18,7 @@ class ResConfigSettings(models.TransientModel):
     # )
 
     validate_po_vat = fields.Boolean(
-        "Vat",
+        "GST",
         config_parameter='mavenautomation.validate_po_vat'
     )
 
@@ -43,7 +43,7 @@ class ResConfigSettings(models.TransientModel):
     )
 
     validate_po_tag = fields.Boolean(
-        "Deal In",
+        "Contact Tag",
         config_parameter='mavenautomation.validate_po_tag'
     )
 

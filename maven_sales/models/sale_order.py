@@ -102,7 +102,7 @@ class SaleOrder(models.Model):
             if validate_so_delivery and not order.carrier_id:
                 missing_fields.append(_("Delivery Method"))
 
-            if validate_so_industry_id and not partner.industry_id:
+            if validate_so_industry_id and not partner.contact_type_id:
                 missing_fields.append(_("Contact Type"))
 
             if missing_fields:

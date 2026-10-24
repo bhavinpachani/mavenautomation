@@ -119,10 +119,10 @@ class PurchaseOrder(models.Model):
 
             # Tags
             if validate_po_tag and not partner.category_id:
-                validate_msgs.append("Deal In")
+                validate_msgs.append("Contact Tag")
 
             # Industry
-            if validate_po_industry_id and not partner.industry_id:
+            if validate_po_industry_id and not partner.contact_type_id:
                 validate_msgs.append("Contact Type")
 
             if validate_msgs:

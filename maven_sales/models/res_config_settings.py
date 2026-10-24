@@ -8,7 +8,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     validate_so_vat = fields.Boolean(
-        string="VAT",
+        string="GST",
         config_parameter="mavenautomation.validate_so_vat"
     )
     validate_so_email = fields.Boolean(
