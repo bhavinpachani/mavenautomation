@@ -7,13 +7,22 @@ from odoo.exceptions import UserError, ValidationError
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    def _default_is_standalone_delivery(self):
+        # Direct delivery orders are standalone. Deliveries created from a sales order are not.
+        if (
+            self.env.context.get('restricted_picking_type_code') == 'outgoing'
+            and not self.env.context.get('default_sale_id')
+        ):
+            return True
+        return False
+
     is_standalone_delivery = fields.Boolean(
         string='Standalone Delivery',
-        default=False,
+        default=_default_is_standalone_delivery,
         copy=False,
         tracking=True,
         index=True,
-        help="Mark a delivery that was created directly, without a sales order. "
+        help="Set automatically on a delivery created directly, without a sales order. "
              "Done standalone deliveries can be selected on a customer invoice.",
     )
     inv_status = fields.Selection(
@@ -40,15 +49,17 @@ class StockPicking(models.Model):
     def _onchange_is_standalone_delivery(self):
         if self.state and self.state != 'draft':
             return
-        if self.sale_id or self.picking_type_code != 'outgoing':
+        if self.sale_id or (self.picking_type_code and self.picking_type_code != 'outgoing'):
             self.is_standalone_delivery = False
+        elif self.picking_type_code == 'outgoing' and not self.sale_id and not self._origin:
+            self.is_standalone_delivery = True
         if self.is_standalone_delivery:
             if self.inv_status != 'invoiced':
                 self.inv_status = 'pending'
         else:
             self.inv_status = False
 
-    @api.constrains('is_standalone_delivery', 'sale_id', 'picking_type_code')
+    @api.constrains('is_standalone_delivery', 'sale_id', 'picking_type_code', 'partner_id', 'state')
     def _check_is_standalone_delivery(self):
         for picking in self:
             if not picking.is_standalone_delivery:
@@ -62,6 +73,11 @@ class StockPicking(models.Model):
             if picking.picking_type_code != 'outgoing':
                 raise ValidationError(_(
                     "Only delivery orders can be marked as standalone deliveries (%(delivery)s).",
+                    delivery=picking.display_name,
+                ))
+            if picking.state == 'draft' and not picking.partner_id:
+                raise ValidationError(_(
+                    "Delivery Address is required on standalone delivery %(delivery)s.",
                     delivery=picking.display_name,
                 ))
 

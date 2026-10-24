@@ -58,10 +58,35 @@ class AccountTax(models.Model):
         return domain
 
     @api.model
-    def _search(self, domain, *args, **kwargs):
-        """Keep non-searchable taxes out of lookups unless the domain already filters this flag."""
-        domain = self._searchable_domain(domain)
-        return super()._search(domain, *args, **kwargs)
+    def _search(self, domain, offset=0, limit=None, order=None, active_test=True, bypass_access=False):
+        """Hide non-searchable taxes from dropdowns, but never from reads of a known tax.
+
+        ``_fetch`` loads records with ``active_test=False`` and an id domain. Folding
+        ``is_searchable`` into that query drops the tax and Odoo reports it as an
+        access error, with no record rule to blame.
+        """
+        if self._apply_searchable_filter(domain, active_test=active_test, bypass_access=bypass_access):
+            domain = self._searchable_domain(domain)
+        return super()._search(
+            domain,
+            offset=offset,
+            limit=limit,
+            order=order,
+            active_test=active_test,
+            bypass_access=bypass_access,
+        )
+
+    @api.model
+    def _apply_searchable_filter(self, domain, active_test=True, bypass_access=False):
+        if self.env.su or bypass_access or not active_test:
+            return False
+        try:
+            return not any(
+                condition.field_expr == 'id'
+                for condition in Domain(domain or Domain.TRUE).iter_conditions()
+            )
+        except Exception:
+            return True
 
     def init(self):
         # New boolean columns are NULL, which does not match "is_searchable = True".

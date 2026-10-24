@@ -9,7 +9,8 @@
     'category': 'Base',
     'version': '19.0.0.1',
     'depends': [
-        'base'
+        'base',
+        'account',
     ],
     'data': [
         'security/maven_access_security.xml'

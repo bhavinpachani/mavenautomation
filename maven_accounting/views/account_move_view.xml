@@ -10,7 +10,17 @@
             <xpath expr="//field[@name='payment_reference']" position="replace"/>
 
             <xpath expr="//field[@name='ref']" position="attributes">
-                <attribute name="required">move_type in ('in_invoice', 'out_invoice', 'in_refund', 'out_refund', 'in_receipt')</attribute>
+                <attribute name="required">move_type in ('in_invoice', 'in_refund', 'out_refund', 'in_receipt')</attribute>
+            </xpath>
+            <xpath expr="//group[@id='header_right_group']/field[@name='delivery_date']" position="after">
+                <field name="ref" string="Customer Reference" invisible="move_type != 'out_invoice'"/>
+            </xpath>
+            <xpath expr="//group[@name='sale_info_group']/label[@for='ref']" position="attributes">
+                <attribute name="invisible">move_type == 'out_invoice'</attribute>
+            </xpath>
+            <xpath expr="//group[@name='sale_info_group']/field[@name='ref']" position="attributes">
+                <attribute name="invisible">move_type == 'out_invoice'</attribute>
+                <attribute name="required">move_type == 'out_refund'</attribute>
             </xpath>
             <xpath expr="//field[@name='invoice_date']" position="attributes">
                 <attribute name="required">move_type in ('out_invoice')</attribute>
