@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_responsible" model="ir.ui.view">
+        <field name="name">stock.picking.form.responsible</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='extra']//field[@name='user_id']" position="replace"/>
+            <xpath expr="//field[@name='location_dest_id'][@groups='stock.group_stock_multi_locations']" position="after">
+                <field name="user_id"
+                       widget="many2one_avatar_user"
+                       domain="[('share', '=', False)]"
+                       readonly="state != 'draft'"
+                       required="state == 'draft' and picking_type_code == 'outgoing'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_form_challan_type" model="ir.ui.view">
+        <field name="name">stock.picking.form.challan.type</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="challan_type_id"
+                       invisible="picking_type_code != 'outgoing'"
+                       readonly="state != 'draft'"
+                       required="state == 'draft' and picking_type_code == 'outgoing'"
+                       force_save="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_tree_challan_type" model="ir.ui.view">
+        <field name="name">stock.picking.list.challan.type</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="challan_type_id"
+                       optional="show"
+                       column_invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_search_challan_type" model="ir.ui.view">
+        <field name="name">stock.picking.search.challan.type</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='picking_type']" position="after">
+                <filter string="Challan Type"
+                        name="group_by_challan_type"
+                        context="{'group_by': 'challan_type_id'}"
+                        invisible="context.get('restricted_picking_type_code') != 'outgoing'"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

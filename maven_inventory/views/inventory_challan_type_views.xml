@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_inventory_challan_type_list" model="ir.ui.view">
+        <field name="name">inventory.challan.type.list</field>
+        <field name="model">inventory.challan.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_inventory_challan_type_form" model="ir.ui.view">
+        <field name="name">inventory.challan.type.form</field>
+        <field name="model">inventory.challan.type</field>
+        <field name="arch" type="xml">
+            <form string="Challan Type">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_inventory_challan_type" model="ir.actions.act_window">
+        <field name="name">Challan Type</field>
+        <field name="res_model">inventory.challan.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_inventory_challan_type"
+        name="Challan Type"
+        parent="stock.menu_delivery"
+        action="action_inventory_challan_type"
+        sequence="110"
+        groups="stock.group_stock_manager"/>
+
+</odoo>
