@@ -86,23 +86,21 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         if not rows:
             raise UserError(_('No data found in the uploaded file.'))
 
-        imported_count = 0
-        not_imported = []
         existing_line_keys = {
             self._line_key(line.product_id.id, line.product_qty, line.price_unit, line.discount)
             for line in order.order_line
             if line.product_id
         }
 
+        # Validate the whole sheet first. Lines are created only when every row matches.
+        results = []
         for row in rows:
             result = self._process_row(order, row, existing_line_keys)
-            if result['imported']:
-                imported_count += 1
-                if result.get('line_key'):
-                    existing_line_keys.add(result['line_key'])
-            else:
-                not_imported.append(result)
+            results.append(result)
+            if result['imported'] and result.get('line_key'):
+                existing_line_keys.add(result['line_key'])
 
+        failed = [result for result in results if not result['imported']]
         vals = {
             'import_message': False,
             'not_imported_file': False,
@@ -111,21 +109,16 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
             'file_name': False,
         }
 
-        if not_imported:
-            vals.update(self._prepare_not_imported_file(not_imported))
-            if imported_count:
-                vals['import_message'] = _(
-                    '%(imported)s line(s) imported successfully. '
-                    '%(failed)s line(s) could not be imported. '
-                    'Please download not_imported.xls.',
-                    imported=imported_count,
-                    failed=len(not_imported),
-                )
-            else:
-                vals['import_message'] = _(
-                    'No lines were imported. Please download not_imported.xls '
-                    'and fix the highlighted values.'
-                )
+        if failed:
+            vals.update(self._prepare_not_imported_file(results))
+            vals['import_message'] = _(
+                'No lines were imported. %(failed)s of %(total)s row(s) have values '
+                'that do not match. Cells in red must be corrected. '
+                'The purchase order is updated only when every row is valid. '
+                'Download not_imported.xls, fix the red cells, and upload the full sheet again.',
+                failed=len(failed),
+                total=len(results),
+            )
             self.write(vals)
             return {
                 'type': 'ir.actions.act_window',
@@ -136,6 +129,9 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
                 'target': 'new',
             }
 
+        self.env['purchase.order.line'].create([
+            result['line_vals'] for result in results
+        ])
         self.write(vals)
         return {
             'type': 'ir.actions.client',
@@ -338,22 +334,32 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
             ('company_id', '=', self.purchase_order_id.company_id.id),
         ]
 
-        product = Product.search([('default_code', '=', code)] + domain_company, limit=1)
-        if not product and code != name:
-            product = Product.search([('default_code', '=', name)] + domain_company, limit=1)
+        product = self._search_exact_ci(Product, 'default_code', code, domain_company)
+        if not product and code.casefold() != name.casefold():
+            product = self._search_exact_ci(Product, 'default_code', name, domain_company)
         if not product and name:
-            product = Product.search([('name', '=ilike', name)] + domain_company, limit=1)
+            product = self._search_exact_ci(Product, 'name', name, domain_company)
         if not product:
-            product = Product.search([('name', '=ilike', raw)] + domain_company, limit=1)
+            product = self._search_exact_ci(Product, 'name', raw, domain_company)
         if not product:
-            product = Product.search([('default_code', '=ilike', raw)] + domain_company, limit=1)
+            product = self._search_exact_ci(Product, 'default_code', raw, domain_company)
         return product
+
+    def _search_exact_ci(self, model, field_name, value, extra_domain=None):
+        """Exact match that ignores letter case."""
+        text = self._cell_value(value)
+        if not text or field_name not in model._fields:
+            return model.browse()
+        domain = list(extra_domain or [])
+        return model.search(domain + [(field_name, '=ilike', text)], limit=1)
+
+    def _find_purchase_for(self, pur_for_value):
+        return self._search_exact_ci(self.env['purchase.for'], 'name', pur_for_value)
 
     def _find_uom(self, uom_name, product):
         if not uom_name:
-            return product.uom_id
-        uom = self.env['uom.uom'].search([('name', '=ilike', self._cell_value(uom_name))], limit=1)
-        return uom
+            return product.uom_id if product else self.env['uom.uom'].browse()
+        return self._search_exact_ci(self.env['uom.uom'], 'name', uom_name)
 
     def _find_analytic_distribution(self, pur_for_value):
         """Map Pur. For value to analytic_distribution if analytic accounts exist."""
@@ -363,11 +369,10 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         if 'analytic_distribution' not in self.env['purchase.order.line']._fields:
             return False, True
         Analytic = self.env['account.analytic.account']
-        account = Analytic.search([
-            ('name', '=ilike', name),
+        account = self._search_exact_ci(Analytic, 'name', name, [
             '|', ('company_id', '=', False),
             ('company_id', '=', self.purchase_order_id.company_id.id),
-        ], limit=1)
+        ])
         if not account:
             return False, False
         return {str(account.id): 100.0}, True
@@ -386,16 +391,14 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         found_taxes = Tax.browse()
 
         for tax_name in self._parse_tax_names(tax_value):
-            tax = Tax.search([
-                ('name', '=ilike', tax_name),
+            tax = self._search_exact_ci(Tax, 'name', tax_name, [
                 ('company_id', '=', company.id),
                 ('type_tax_use', '=', 'purchase'),
-            ], limit=1)
+            ])
             if not tax:
-                tax = Tax.search([
-                    ('name', '=ilike', tax_name),
+                tax = self._search_exact_ci(Tax, 'name', tax_name, [
                     ('company_id', '=', company.id),
-                ], limit=1)
+                ])
             status_list.append({
                 'name': tax_name,
                 'found': bool(tax),
@@ -420,10 +423,9 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         pur_for = self._cell_value(row.get('PUR. FOR', ''))
         expected_raw = row.get('EXPECTED ARRIVAL', '')
         expected_arrival = self._parse_datetime(expected_raw)
-        price_unit = unit_rate or 0.0
-        purchase_for_id = False
-        if pur_for:
-            purchase_for_id = self.env['purchase.for'].search([('name', '=', str(pur_for))], limit=1)
+        lp_price = self._parse_float(row.get('LP', ''), None)
+        price_unit = lp_price if lp_price is not None else (unit_rate or 0.0)
+        purchase_for = self._find_purchase_for(pur_for) if pur_for else self.env['purchase.for'].browse()
 
         failure_reasons = []
         product_found = bool(product)
@@ -445,16 +447,16 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         if self._cell_value(expected_raw) and not expected_arrival:
             failure_reasons.append('invalid_expected_arrival')
 
-        if pur_for and not purchase_for_id:
+        if pur_for and not purchase_for:
             failure_reasons.append('pur_for_not_found')
 
-        uom = False
-        if product_found:
-            uom = self._find_uom(unit_name, product)
-            if unit_name and not uom:
+        uom = self.env['uom.uom'].browse()
+        if unit_name:
+            uom = self._find_uom(unit_name, product if product_found else self.env['product.product'].browse())
+            if not uom:
                 failure_reasons.append('uom_not_found')
-            elif not uom:
-                uom = product.uom_id
+        elif product_found:
+            uom = product.uom_id
 
         if tax_status and not taxes_ok:
             failure_reasons.append('tax_not_found')
@@ -463,7 +465,11 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
             'Product': self._cell_value(product_value),
             'Quantity': quantity,
             'Unit': unit_name,
-            'Pur. For': purchase_for_id and purchase_for_id.id or False,
+            'Pur. For': pur_for,
+            'pur_for_found': bool(purchase_for) if pur_for else True,
+            'quantity_valid': quantity > 0,
+            'uom_valid': not unit_name or bool(uom),
+            'expected_valid': not self._cell_value(expected_raw) or bool(expected_arrival),
             'Expected Arrival': self._cell_value(expected_raw) or (expected_arrival or ''),
             'LP': lp_value,
             'Disc.%': discount,
@@ -472,7 +478,7 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
             'Taxes': self._cell_value(row.get('TAXES', '')),
             'product_found': product_found,
             'tax_status': tax_status,
-            'reason': ', '.join(failure_reasons),
+            'reason': self._failure_message(failure_reasons),
         }
 
         if failure_reasons:
@@ -488,8 +494,8 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
             'product_id': product.id,
             'product_qty': quantity,
             'product_uom_id': uom.id,
-            'price_unit': lp_value,
-            'purchase_for_id':  purchase_for_id and purchase_for_id.id or False,
+            'price_unit': price_unit,
+            'purchase_for_id': purchase_for.id or False,
             'discount': discount,
         }
         if expected_arrival:
@@ -502,13 +508,26 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         if taxes:
             line_vals['tax_ids'] = [(6, 0, taxes.ids)]
 
-        self.env['purchase.order.line'].create(line_vals)
         return {
             'imported': True,
             'product_id': product.id,
             'line_key': line_key,
+            'line_vals': line_vals,
             'export_row': export_row,
         }
+
+    def _failure_message(self, failure_reasons):
+        labels = {
+            'missing_product': 'Product is empty',
+            'product_not_found': 'Product not found',
+            'already_imported': 'This line is already on the purchase order',
+            'invalid_quantity': 'Quantity must be greater than zero',
+            'invalid_expected_arrival': 'Expected Arrival is not a valid date',
+            'pur_for_not_found': 'Pur. For not found',
+            'uom_not_found': 'Unit not found',
+            'tax_not_found': 'Tax not found',
+        }
+        return '; '.join(labels.get(reason, reason) for reason in failure_reasons)
 
     def _font_style(self, colour_index=None, bold=False):
         style = xlwt.XFStyle()
@@ -528,19 +547,24 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
         green_style = self._font_style(colour_index=xlwt.Style.colour_map['green'])
         default_style = self._font_style()
 
-        for col, header in enumerate(IMPORT_HEADERS):
+        headers = list(IMPORT_HEADERS) + ['Reason']
+        for col, header in enumerate(headers):
             sheet.write(0, col, header, header_style)
-            sheet.col(col).width = 4500
+            sheet.col(col).width = 4500 if header != 'Reason' else 9000
 
         for row_idx, item in enumerate(not_imported, start=1):
             export_row = item['export_row']
             product_style = green_style if export_row.get('product_found') else red_style
+            quantity_style = default_style if export_row.get('quantity_valid', True) else red_style
+            unit_style = default_style if export_row.get('uom_valid', True) else red_style
+            pur_for_style = default_style if export_row.get('pur_for_found', True) else red_style
+            expected_style = default_style if export_row.get('expected_valid', True) else red_style
 
             sheet.write(row_idx, 0, export_row.get('Product', ''), product_style)
-            sheet.write(row_idx, 1, export_row.get('Quantity', ''), default_style)
-            sheet.write(row_idx, 2, export_row.get('Unit', ''), default_style)
-            sheet.write(row_idx, 3, export_row.get('Pur. For', ''), default_style)
-            sheet.write(row_idx, 4, export_row.get('Expected Arrival', ''), default_style)
+            sheet.write(row_idx, 1, export_row.get('Quantity', ''), quantity_style)
+            sheet.write(row_idx, 2, export_row.get('Unit', ''), unit_style)
+            sheet.write(row_idx, 3, export_row.get('Pur. For', ''), pur_for_style)
+            sheet.write(row_idx, 4, export_row.get('Expected Arrival', ''), expected_style)
             sheet.write(row_idx, 5, export_row.get('LP', ''), default_style)
             sheet.write(row_idx, 6, export_row.get('Disc.%', ''), default_style)
             sheet.write(row_idx, 7, export_row.get('Unit Rate', ''), default_style)
@@ -572,6 +596,9 @@ class ImportPurchaseOrderLineWizard(models.TransientModel):
                         else:
                             mixed_parts.append('%s [MISSING]' % status['name'])
                     sheet.write(row_idx, 9, '; '.join(mixed_parts), red_style)
+
+            reason = export_row.get('reason') or ''
+            sheet.write(row_idx, 10, reason, red_style if reason else default_style)
 
         buffer = io.BytesIO()
         workbook.save(buffer)

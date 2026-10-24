@@ -10,14 +10,16 @@ Import Purchase Order Lines
 * Import POL button on draft purchase orders
 * Upload XLS / CSV with Product, Quantity, Unit, Pur. For, Expected Arrival,
   LP, Disc.%, Unit Rate, Amount, Taxes
-* Creates purchase.order.line on the current order only
-* Skips already imported lines
-* Downloads not_imported.xls with red/green highlighting for product and taxes
+* Creates purchase.order.line on the current order only when every row is valid
+* Matches Product, Unit, Pur. For and Taxes without checking letter case
+* Does not import any line when the sheet still has unmatched values
+* Downloads not_imported.xls with unmatched values shown in red
     """,
     'author': '',
     'website': '',
     'depends': [
         'purchase',
+        'maven_purchase',
     ],
     'data': [
         'security/ir.model.access.csv',
